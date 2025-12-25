@@ -1,0 +1,196 @@
+﻿@typeparam T
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.AspNetCore.Components.Web.Virtualization
+
+<script>
+    /**
+     * Scrolls the virtualized tree container to the approximate index of a node.
+     * This is a two-phase virtualization-safe scroll:
+     *   1) Force the Virtualize component to render the target row by index.
+     *   2) Adjust the scroll position to account for real-world DOM row height.
+     *
+     * This function does NOT guarantee pixel-perfect alignment on its own;
+     * it ensures the target row exists in the DOM so a follow-up scroll
+     * (by DOM id) can safely occur.
+     */
+    window.lazyTreeScrollToIndex = (containerId, index, rowHeight) => {
+        // Locate the scrollable tree container
+        const container = document.getElementById(containerId);
+        if (!container)
+            return;
+
+        /**
+         * Locate the first rendered tree row currently in the DOM.
+         * We use this row to determine the actual rendered row height.
+         *
+         * In virtualized lists, the configured row height is an estimate.
+         * Fonts, padding, borders, and line-height can all cause the real
+         * rendered height to differ slightly.
+         */
+        const firstRow = container.querySelector(".virt-tree-row");
+
+        /**
+         * Offset is critical to avoid cumulative scroll drift.
+         *
+         * If the actual DOM row height differs from the configured
+         * Virtualize ItemSize, repeated index-based scrolling will
+         * overshoot or undershoot the target position.
+         *
+         * We compute the delta once and apply it to the scroll calculation.
+         */
+        let offset = 0;
+
+        if (firstRow) {
+            const computedHeight = firstRow.getBoundingClientRect().height;
+            offset = computedHeight - rowHeight;
+        }
+
+        /**
+         * Scroll to the estimated vertical position for the target index.
+         * This ensures the row is rendered by the virtualizer.
+         */
+        container.scrollTop = index * (rowHeight + offset);
+    };
+
+
+
+    /**
+     * Scrolls the tree to a specific node by DOM id.
+     *
+     * This function assumes the node may not yet exist in the DOM due to
+     * virtualization. It retries using requestAnimationFrame until the
+     * element appears or a maximum retry count is reached.
+     *
+     * This is the second phase of programmatic scrolling and is responsible
+     * for precise positioning and visual centering.
+     */
+    window.lazyTreeScrollToNode = (containerId, nodeId, smooth, align) => {
+        // Locate the scrollable tree container
+        const container = document.getElementById(containerId);
+        if (!container) return;
+
+        let attempts = 0;
+        const maxAttempts = 20;
+
+        /**
+         * Attempts to locate the node in the DOM and scroll it into view.
+         * If the node is not yet rendered, retry on the next animation frame.
+         */
+        const tryScroll = () => {
+            const node = document.getElementById(nodeId);
+
+            if (node) {
+                /**
+                 * Scroll the node into view once it exists.
+                 * "center" provides a stable visual anchor and avoids edge clipping.
+                 */
+                node.scrollIntoView({
+                    behavior: smooth ? "smooth" : "auto",
+                    block: align,
+                });
+                return;
+            }
+
+            /**
+             * Retry while the virtualizer is still rendering.
+             * This prevents hard failures when navigating deep trees.
+             */
+            if (attempts++ < maxAttempts) {
+                requestAnimationFrame(tryScroll);
+            }
+        };
+
+        tryScroll();
+    };
+
+
+</script>
+
+
+@* 
+    Scrollable container for the virtualized tree.
+    - max-height is configurable via parameter
+    - overflow-y enables independent scrolling
+    - id is used by JS interop for programmatic scrolling
+*@
+<div id="lazy-virt-tree-container"
+     class="virt-tree-container"
+     style="height:@Height; overflow-y:auto; width:@Width">
+
+    @* 
+        Virtualize renders only the visible subset of nodes for performance.
+        - Items is the flattened list of expanded nodes
+        - ItemSize must closely match the rendered row height
+        - OverscanCount renders extra rows above/below for smooth scrolling
+    *@
+    <Virtualize Items="@_visibleNodes"
+                Context="node"
+                ItemSize="@RowHeight"
+                OverscanCount="15">
+
+        <ItemContent>
+            @* 
+                Single tree row.
+                - DomId is required for scroll-to-node JS interop
+                - Selected node is visually highlighted
+                - Click selects the node
+                - Right-click raises a context menu event
+            *@
+            <div id="@node.DomId"
+                 class="virt-tree-row @(node == SelectedNode ? "selected" : "")"
+                 @onclick="@(() => OnRowClicked(node))"
+                 @ondblclick="@(() => OnRowDoubleClicked(node))"
+                 @oncontextmenu="@((MouseEventArgs e) => OnContextMenuAsync(e, node))"
+                 @oncontextmenu:preventDefault="true"
+                 @oncontextmenu:stopPropagation="true">
+
+                @* 
+                    Content wrapper.
+                    Left margin is based on node depth to visually indicate hierarchy.
+                *@
+                <div class="virt-tree-content"
+                     style="margin-left:@(node.Level* IndentSizePx)px">
+
+                    @* Expand / collapse toggle *@
+                    @if (node.CanHaveChildren)
+                    {
+
+                        <span class="virt-tree-icon"
+                              style="width:@($"{IconSize}px")"
+                              @onclick:stopPropagation="true"
+                              @onclick="@(() => ToggleAsync(node))">
+
+                            <span class="material-symbols-outlined @(node.IsLoading ? "virt-tree-spinner" : "")"
+                                  style="font-size:@($"{IconSize}px")">
+                                @ResolveExpandIcon(node)
+                            </span>
+                        </span>
+                    }
+                    else
+                    {
+                        @* Placeholder keeps text alignment consistent for leaf nodes *@
+                        <span class="virt-tree-icon-placeholder"
+                              style="width:@($"{IconSize}px")">
+                        </span>
+                    }
+
+
+                    @* Main node icon (consumer-defined) *@
+                    <span class="virt-tree-node-icon material-symbols-outlined"
+                          style="font-size:@($"{IconSize}px")">
+                        @ResolveNodeIcon(node)
+                    </span>
+
+                    @* Display text for the node *@
+                    <span class="virt-tree-text"
+                          style="font-size:@($"{IconSize - 2}px")">
+                        @node.Text
+                    </span>
+
+                </div>
+            </div>
+        </ItemContent>
+
+    </Virtualize>
+
+</div>

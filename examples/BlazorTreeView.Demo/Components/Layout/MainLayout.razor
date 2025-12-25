@@ -1,0 +1,31 @@
+﻿@inherits LayoutComponentBase
+
+<RadzenComponents @rendermode="InteractiveServer" />
+
+
+<div class="page">
+    <div class="sidebar">
+        <NavMenu />
+    </div>
+
+    <main>
+        <div class="top-row px-4">
+            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+        </div>
+
+        <article class="content px-4">
+            @Body
+        </article>
+
+        <footer class="app-footer">
+            <p>&copy; 2025 BlazorTreeView.Demo. Created by Joel Luthi.</p>
+        </footer>
+    </main>
+
+</div>
+
+<div id="blazor-error-ui" data-nosnippet>
+    An unhandled error has occurred.
+    <a href="." class="reload">Reload</a>
+    <span class="dismiss">🗙</span>
+</div>

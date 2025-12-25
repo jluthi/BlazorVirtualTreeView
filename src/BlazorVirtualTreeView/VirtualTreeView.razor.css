@@ -1,0 +1,65 @@
+﻿.virt-tree-container {
+    font-family: inherit;
+    font-size: inherit;
+}
+
+.virt-tree-row {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 2px 4px; /* breathing room */
+    margin: 0px;
+    border-radius: 4px;
+}
+
+    .virt-tree-row:hover {
+        background-color: rgba(0, 0, 0, 0.04);
+    }
+
+    .virt-tree-row.selected {
+        background-color: rgba(25, 118, 210, 0.20); /* Override colors here */
+    }
+
+.virt-tree-content {
+    display: flex;
+    align-items: center;
+    gap: 6px; /* spacing between icon and text */
+}
+
+.virt-tree-icon,
+.virt-tree-icon-placeholder {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/* Material icon alignment fixes */
+.material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+    vertical-align: middle;
+}
+
+/* Text styling similar to MudTreeView */
+.virt-tree-text {
+    line-height: 1.35;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+
+.virt-tree-spinner {
+    animation: spin 1s linear infinite;
+}

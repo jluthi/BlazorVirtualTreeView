@@ -1,0 +1,99 @@
+# .gitignore for .NET / Blazor projects
+# Generated for BlazorVirtualTreeView solution
+
+# Build outputs
+bin/
+obj/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Rider
+.idea/
+*.sln.iml
+
+# Dotnet user secrets
+secrets.json
+
+# NuGet packages
+*.nupkg
+packages/
+.nuget/packages/
+project.lock.json
+project.fragment.lock.json
+
+# Visual Studio Code
+.vscode/
+.vscode/*
+!.vscode/extensions.json
+
+# IIS Express
+/.vs*/
+
+# Publish folder
+publish/
+wwwroot/dist/
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.swp
+*~
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Resharper
+_ReSharper*/
+*.[Rr]e[Ss]harper
+
+# Test results
+TestResults/
+*.trx
+
+# JetBrains Rider
+.idea/
+*.sln.iml
+
+# dotCover
+*.dotCover
+
+# EF Core Migrations
+Migrations/*.Snapshot.cs
+
+# ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+# npm / yarn
+node_modules/
+
+# Generated docs or demo artifacts
+docs/demo-*.png
+
+# User-specific files
+*.local
+
+# Rider caches
+.idea/
+
+# temp folders (sometimes used by demos / tooling)
+.temp/
+
+# GitHub Actions artifacts
+.github/workflows/*.local
+
+# End of .gitignore

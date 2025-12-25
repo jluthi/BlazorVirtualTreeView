@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="examples/BlazorTreeView.Demo/BlazorTreeView.Demo.csproj" />
+  <Project Path="src/BlazorVirtualTreeView/BlazorVirtualTreeView.csproj" />
+</Solution>
