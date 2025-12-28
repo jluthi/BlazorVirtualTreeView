@@ -86,7 +86,7 @@ If you need per-node icons today, you can extend the node model and customize th
 
 ## Demo GIF
 
-![Lazy loading demo](demo-lazy-load.gif)
+![Lazy loading demo](demo.gif)
 
 Description: The GIF shows expanding to a deep node, node navigation via URL query string, real-time lazy loading, and virtual scrolling with smooth scrolling enabled.  
 
