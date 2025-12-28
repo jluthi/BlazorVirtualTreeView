@@ -2,8 +2,8 @@
 
 A high-performance, virtualized tree view component for Blazor with lazy-loading support. This repository contains the reusable `VirtualTreeView` component and a demo app showing how to use it at scale. As the Blazor ecosystem continues to mature, this project helps address a gap in available open-source components.
 
-Class Library: `BlazorVirtualTreeView.csproj`
-<br/>
+Project: `BlazorVirtualTreeView.csproj`
+
 Target Framework: .NET 10+
 
 _Nuget package coming soon*_
@@ -22,7 +22,21 @@ See the demo app in `examples/BlazorTreeView.Demo` for a working example.
 
 > The demo app included here was built using Radzen demo components (buttons, sliders, menus) for convenience; however, any Blazor component library should work with this component.
 
-### Tree View Setup
+## Demo GIF
+
+![Lazy loading demo](demo.gif)
+
+Description: The GIF shows expanding to a deep node, node navigation via URL query string, real-time lazy loading, and virtual scrolling with smooth scrolling enabled.  
+
+## Demo Quick Start
+
+In your IDE, navigate to the demo source folder: `examples/BlazorTreeView.Demo`.
+
+Open the `BlazorTreeView.Demo.csproj` file, set it as the startup project, then build and run the application.
+
+
+
+## Tree View Getting Started
 
 - Provide root nodes via `Roots`.
 - Supply a child-loading callback via `LoadChildren="LoadChildrenAsync"`.
@@ -69,7 +83,7 @@ The component provides simple, built-in icon controls and is easy to customize:
 
 These parameters are used by the component's internal icon resolver (`ResolveNodeIcon` and `ResolveExpandIcon`) to choose which icon string to render for each row. Example usage in markup:
 
-**Override Default Icons Example:**
+*Override Default Icons Example:*
 
 ```razor
 <VirtualTreeView
@@ -80,21 +94,6 @@ These parameters are used by the component's internal icon resolver (`ResolveNod
 ```
 > Note: Per-node icon customization is not supported out of the box yet.
 If you need per-node icons today, you can extend the node model and customize the rendering logic. Currently exploring first-class per-node icon support in a future release, since nodes can represent arbitrary domain data. Things may change here a lot in regard to icon overriding and handling. 
-
-
-
-
-## Demo GIF
-
-![Lazy loading demo](demo.gif)
-
-Description: The GIF shows expanding to a deep node, node navigation via URL query string, real-time lazy loading, and virtual scrolling with smooth scrolling enabled.  
-
-## Demo Quick Start
-
-In your IDE, navigate to the demo source folder: `examples/BlazorTreeView.Demo`.
-
-Open the `BlazorTreeView.Demo.csproj` file, set it as the startup project, then build and run the application.
 
 
 
