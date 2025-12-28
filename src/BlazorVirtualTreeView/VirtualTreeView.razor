@@ -156,12 +156,12 @@
                     {
 
                         <span class="virt-tree-icon"
-                              style="width:@($"{IconSize}px")"
+                              style="width:@($"{IconSizePx}px")"
                               @onclick:stopPropagation="true"
                               @onclick="@(() => ToggleAsync(node))">
 
                             <span class="material-symbols-outlined @(node.IsLoading ? "virt-tree-spinner" : "")"
-                                  style="font-size:@($"{IconSize}px")">
+                                  style="font-size:@($"{IconSizePx}px")">
                                 @ResolveExpandIcon(node)
                             </span>
                         </span>
@@ -170,20 +170,20 @@
                     {
                         @* Placeholder keeps text alignment consistent for leaf nodes *@
                         <span class="virt-tree-icon-placeholder"
-                              style="width:@($"{IconSize}px")">
+                              style="width:@($"{IconSizePx}px")">
                         </span>
                     }
 
 
                     @* Main node icon (consumer-defined) *@
                     <span class="virt-tree-node-icon material-symbols-outlined"
-                          style="font-size:@($"{IconSize}px")">
+                          style="font-size:@($"{IconSizePx}px")">
                         @ResolveNodeIcon(node)
                     </span>
 
                     @* Display text for the node *@
                     <span class="virt-tree-text"
-                          style="font-size:@($"{IconSize - 2}px")">
+                          style="font-size:@($"{IconSizePx - 2}px")">
                         @node.Text
                     </span>
 

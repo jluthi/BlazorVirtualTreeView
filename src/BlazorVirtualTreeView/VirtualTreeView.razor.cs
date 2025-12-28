@@ -15,41 +15,105 @@ namespace BlazorVirtualTreeView
         private IJSRuntime JS { get; set; } = default!;
 
         // Parameters
+        /// <summary>
+        /// The top-level nodes displayed by the tree. Provide a stable collection of root nodes.
+        /// The component reads and renders this collection as a starting point. Each node should have a
+        /// unique <see cref="VirtualTreeViewNode{T}.Path"/> so programmatic navigation works.
+        /// </summary>
         [Parameter, EditorRequired]
         public IReadOnlyList<VirtualTreeViewNode<T>> Roots { get; set; }
             = Array.Empty<VirtualTreeViewNode<T>>();
 
+        /// <summary>
+        /// Callback used to lazy-load children for a node. The component calls this function when
+        /// a node is expanded for the first time. Return an ordered list of child nodes. This populates the component.
+        /// </summary>
         [Parameter, EditorRequired]
         public Func<VirtualTreeViewNode<T>, Task<IReadOnlyList<VirtualTreeViewNode<T>>>> LoadChildren { get; set; }
             = default!;
 
+        /// <summary>
+        /// Event invoked when the selected node changes. Use this to synchronize selection with
+        /// parent state or to react to user selection.
+        /// </summary>
         [Parameter]
         public EventCallback<VirtualTreeViewNode<T>> SelectedNodeChanged { get; set; }
 
+        /// <summary>
+        /// Event invoked when the user opens a context menu on a node (right-click).
+        /// The callback receives the mouse event args and the node under the pointer.
+        /// </summary>
         [Parameter]
         public EventCallback<(MouseEventArgs MouseArgs, VirtualTreeViewNode<T> Node)> OnNodeContextMenu { get; set; }
 
+        /// <summary>
+        /// Controls how the tree attempts to align a scrolled-to node in the viewport.
+        /// Default is <see cref="ScrollAlignments.Center"/>.
+        /// </summary>
         [Parameter]
         public ScrollAlignments ScrollAlignment { get; set; } = ScrollAlignments.Center;
 
-        [Parameter] public string NodeIconCollapsed { get; set; } = "folder";
-        [Parameter] public string NodeIconExpanded { get; set; } = "folder_open";
-        [Parameter] public string? DefaultIcon { get; set; } = "Description";
+        /// <summary>
+        /// Material icon name used for nodes that can have children but are currently collapsed.
+        /// Default: "folder".
+        /// </summary>
+        [Parameter] public string CollapsedNodeIcon { get; set; } = "folder";
+        
+        /// <summary>
+        /// Material icon name used for nodes that can have children and are currently expanded.
+        /// Default: "folder_open".
+        /// </summary>
+        [Parameter] public string ExpandedNodeIcon { get; set; } = "folder_open";
 
+        /// <summary>
+        /// Material icon name used for leaf nodes (nodes that cannot have children).
+        /// Default: "Description".
+        /// </summary>
+        [Parameter] public string LeafNodeIcon { get; set; } = "Description";
+
+        /// <summary>
+        /// If true, a double-click on a node will expand/collapse it. When false, a double-click
+        /// will not toggle expansion and a single click may toggle depending on settings.
+        /// </summary>
         [Parameter] public bool ExpandOnNodeDoubleClick { get; set; }
 
+        /// <summary>
+        /// CSS height for the tree container (for example "500px" or "50vh"). Used to calculate
+        /// virtualization viewport and scrolling.
+        /// </summary>
         [Parameter] public string Height { get; set; } = "500px";
+
+        /// <summary>
+        /// CSS width for the tree container (for example "500px" or "100%").
+        /// </summary>
         [Parameter] public string Width { get; set; } = "500px";
 
+        /// <summary>
+        /// Visual size variant for the tree. Affects row height, icon size and indent.
+        /// Default: <see cref="VirtualTreeViewSize.Medium"/>.
+        /// </summary>
         [Parameter]
         public VirtualTreeViewSize Size { get; set; } = VirtualTreeViewSize.Medium;
 
+        /// <summary>
+        /// When true, scrolling performed by the component (programmatic scroll-to-node) will
+        /// use smooth animated scrolling where supported by the browser.
+        /// </summary>
         [Parameter]
         public bool SmoothScrolling { get; set; } = true;
 
         // Public state
+        /// <summary>
+        /// Currently selected node in the tree, or null when nothing is selected.
+        /// Read-only; use <see cref="SelectedNodeChanged"/> event and component APIs to update.
+        /// </summary>
         public VirtualTreeViewNode<T>? SelectedNode => _selectedNode;
 
+        /// <summary>
+        /// Number of nodes currently represented in the virtualized viewport. This reflects the
+        /// flattened (visible) node count after expansion state is applied and is useful for
+        /// debugging or telemetry in demos.
+        /// </summary>
         public int VirtualizedNodeCount => _virtualizedNodeCount;
 
         // Private state
@@ -73,7 +137,7 @@ namespace BlazorVirtualTreeView
             _ => 28
         };
 
-        private int IconSize => Size switch
+        private int IconSizePx => Size switch
         {
             VirtualTreeViewSize.Small => 18,
             VirtualTreeViewSize.Medium => 20,
@@ -89,7 +153,6 @@ namespace BlazorVirtualTreeView
             _ => 18
         };
 
-        // Lifecycle
         protected override void OnParametersSet() => Rebuild();
      
         protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -122,9 +185,9 @@ namespace BlazorVirtualTreeView
         private string ResolveNodeIcon(VirtualTreeViewNode<T> node)
         {
             if (!node.CanHaveChildren)
-                return DefaultIcon;
+                return LeafNodeIcon;
 
-            return (node.Children != null && node.Children.Count > 0) ? NodeIconExpanded : NodeIconCollapsed;
+            return (node.Children != null && node.Children.Count > 0) ? ExpandedNodeIcon : CollapsedNodeIcon;
         }
 
 
