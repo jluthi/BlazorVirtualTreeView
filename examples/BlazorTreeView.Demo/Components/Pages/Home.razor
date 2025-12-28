@@ -131,16 +131,16 @@
 
 @*VIRTUALIZED TREE VIEW IS HERE!*@
 <VirtualTreeView @ref="_treeView"
+                 Height="800px"
+                 Width="30%"
                  T="DemoNode"
                  Roots="@Roots"
                  LoadChildren="LoadChildrenAsync"
+                 Size="VirtualTreeViewSize.Medium"
                  SmoothScrolling="@_smoothScroll"
                  ScrollAlignment="ScrollAlignments.Center"
-                 SelectedNodeChanged="OnSelectedNodeChanged"
                  ExpandOnNodeDoubleClick="@_expandOnDoubleClick"
-                 Size="VirtualTreeViewSize.Medium"
-                 Height="800px"
-                 Width="30%"
+                 SelectedNodeChanged="OnSelectedNodeChanged"
                  OnNodeContextMenu="OnNodeContextMenu" />
 
 @code
