@@ -36,7 +36,7 @@ Open the `BlazorTreeView.Demo.csproj` file, set it as the startup project, then 
 
 
 
-## Tree View Getting Started
+## VirtualTreeView Component - Getting Started
 
 - Provide root nodes via `Roots`.
 - Supply a child-loading callback via `LoadChildren="LoadChildrenAsync"`.
