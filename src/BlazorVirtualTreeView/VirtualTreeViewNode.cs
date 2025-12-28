@@ -49,14 +49,6 @@
     /// </summary>
     public bool CanHaveChildren { get; set; }
 
-    /// <summary>
-    /// True if this node should display an expand affordance.
-    /// This becomes false once children are loaded and none exist.
-    /// </summary>
-    public bool HasExpandableChildren =>
-        CanHaveChildren &&
-        (!ChildrenLoaded || (Children != null && Children.Count > 0));
-
     #endregion
 
 
