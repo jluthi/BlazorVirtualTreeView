@@ -10,11 +10,11 @@ _NuGet package coming soon*_
 
 ## Key features
 
-- **Virtualization (<u>Key Feature</u>)**: Only visible rows are rendered, keeping the DOM small and scrolling responsive with both small and large datasets.
-- **Lazy Loading**: Children are requested on expansion using a `LoadChildren` callback method.
-- **Programmatic Navigation**: Expands ancestors, selects, and focuses a given node via the `SelectNodeAsync` method.
-- **Context Menu Support**: Integrate with custom or third-party right-click context menus using `OnNodeContextMenu`, passing `Microsoft.AspNetCore.Components.Web.MouseEventArgs` (see demo project).
-- **Performance & Style Customizations**: A variety of exposed parameters to fine-tune look and feel.
+- <u>Virtualization (<u>Key Feature</u>)</u>: Only visible rows are rendered, keeping the DOM small and scrolling responsive with both small and large datasets.
+- <u>Lazy Loading</u>: Children are requested on expansion using a `LoadChildren` callback method.
+- <u>Programmatic Navigation</u>: Expands ancestors, selects, and focuses a given node via the `SelectNodeAsync` method.
+- <u>Context Menu Support</u>: Integrate with custom or third-party right-click context menus using `OnNodeContextMenu`, passing `Microsoft.AspNetCore.Components.Web.MouseEventArgs`.
+- <u>Performance & Style Customizations</u>: A variety of exposed parameters to fine-tune look and feel.
 
 See the demo app in `examples/BlazorTreeView.Demo` for a working example.
 
