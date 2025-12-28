@@ -316,11 +316,32 @@ namespace BlazorVirtualTreeView
         {
             _visibleNodes.Clear();
 
+            // Ensure Parent/Level are correct for whatever graph we currently have
+            foreach (var root in Roots)
+                NormalizeLinksRecursive(root, parent: null, level: 0);
+
             foreach (var root in Roots)
                 Flatten(root);
 
             StateHasChanged();
         }
+
+        // Ensure Parent and Level properties are correct in the current tree structure
+        private static void NormalizeLinksRecursive(
+            VirtualTreeViewNode<T> node,
+            VirtualTreeViewNode<T>? parent,
+            int level)
+        {
+            node.Parent = parent;
+            node.Level = level;
+
+            if (node.Children == null)
+                return;
+
+            foreach (var child in node.Children)
+                NormalizeLinksRecursive(child, node, level + 1);
+        }
+
 
         private void Flatten(VirtualTreeViewNode<T> node)
         {
