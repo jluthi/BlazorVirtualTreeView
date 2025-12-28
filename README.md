@@ -2,23 +2,39 @@
 
 A high-performance, virtualized tree view component for Blazor with lazy-loading support. This repository contains the reusable `VirtualTreeView` component and a demo app showing how to use it at scale. As the Blazor ecosystem continues to mature, this project helps address a gap in available open-source components.
 
-Solution: `BlazorVirtualTreeView.slnx`
+Class Library: `BlazorVirtualTreeView.csproj`
+<br/>
+Target Framework: .NET 10+
+
+_Nuget package coming soon*_
 
 ## Key features
 
-- Virtualization: only visible rows exist in the DOM for smooth scrolling.
+- Virtualization: only visible rows are rendered, keeping the DOM small and scrolling smooth.
 - Lazy loading: children are requested on expansion using a `LoadChildren` callback.
 - Programmatic navigation: methods such as `SelectNodeAsync` to navigate to a path.
-- Selection sync: optional URL query synchronization for the selected node.
-- Context menus: example integration using `ContextMenuService`.
+- Selection sync: optional URL query synchronization for the selected node (see example project).
+- Context menus: integrate with custom or third party rick-click context menu's using `OnNodeContextMenu` passing `Microsoft.AspNetCore.Components.Web.MouseEventArgs`.
 - Small footprint and responsive UI: smooth scrolling and size options (`VirtualTreeViewSize`).
 - Demo telemetry: demo shows a running `TotalLoadedNodeCount` to observe lazy-loading behavior.
 
 See the demo app in `examples/BlazorTreeView.Demo` for a working example.
 
-> Demo UI note: the demo app included here was built using Radzen demo components (buttons, sliders, menus) for convenience - any Blazor component library should work with this component.
+> The demo app included here was built using Radzen demo components (buttons, sliders, menus) for convenience; however, any Blazor component library should work with this component.
 
-## Data model flexibility
+### Tree View Setup
+
+- Provide root nodes via `Roots`.
+- Supply a child-loading callback via `LoadChildren="LoadChildrenAsync"`.
+- Use component API methods on the `@ref`-ed `VirtualTreeView<T>` instance:
+  - `SelectNodeAsync(path)`
+  - `AddNode(...)`
+  - `RemoveNode()`
+  - `RefreshSelectedAsync()`
+
+See `examples/BlazorTreeView.Demo/Components/Pages/Home.razor` for a full usage example.
+
+#### Node flexibility
 
 Although the demo shows a folder / subfolder style tree, the component is data-agnostic and supports any hierarchical model that can be expressed with a stable `Path` per node and a `CanHaveChildren` flag. Examples beyond filesystem-style folders:
 
@@ -36,77 +52,59 @@ How to adapt your data:
 
 This flexibility means you can present hierarchical data that is not a literal filesystem but still benefits from virtualization and lazy-loading.
 
-## Icon customization
+#### Node customization
+
+The tree uses **Google Material Design icons** for all built-in node rendering.  
+Each icon is defined by a Material icon name (string), and you can override any or all of them with any valid Google Material Design icon.
 
 The component provides simple, built-in icon controls and is easy to customize:
 
-- Component-level parameters:
-  - `NodeIconCollapsed` - icon name used for nodes that can have children but are currently collapsed (default: "folder").
-  - `NodeIconExpanded` - icon name used for nodes that have children (default: "folder_open").
-  - `DefaultIcon` - icon name used for leaf nodes (default: "Description").
+- **Component-level parameters (Material icon names):**
+  - `CollapsedNodeIcon` – icon used for nodes that can have children but are currently collapsed  
+    *(default: `"folder"`)*
+  - `ExpandedNodeIcon` – icon used for nodes that have children and are expanded  
+    *(default: `"folder_open"`)*
+  - `LeafNodeIcon` – icon used for leaf nodes  
+    *(default: `"description"`)*
 
 These parameters are used by the component's internal icon resolver (`ResolveNodeIcon` and `ResolveExpandIcon`) to choose which icon string to render for each row. Example usage in markup:
 
-`<VirtualTreeView NodeIconCollapsed="folder" NodeIconExpanded="folder_open" DefaultIcon="description" />`
+**Override Default Icons Example:**
 
-Note: Per-node icon customization is not supported out of the box yet.
+```razor
+<VirtualTreeView
+    NodeIconCollapsed="group_off"
+    NodeIconExpanded="group"
+    DefaultIcon="person" 
+    .../>
+```
+> Note: Per-node icon customization is not supported out of the box yet.
 If you need per-node icons today, you can extend the node model and customize the rendering logic. Currently exploring first-class per-node icon support in a future release, since nodes can represent arbitrary domain data. Things may change here a lot in regard to icon overriding and handling. 
 
-Styling
 
-- The demo uses Google Material Symbols via `material-symbols-outlined` CSS class for icons. You can change the class or render arbitrary markup in the template to use Font Awesome, SVGs, or image icons.
-*For your own project be sure to include - `<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"rel="stylesheet" />` - in the App.razor header
-
-## Core component files
-
-- `src/BlazorVirtualTreeView/VirtualTreeView.razor`
-- `src/BlazorVirtualTreeView/VirtualTreeView.razor.cs`
-- `src/BlazorVirtualTreeView/VirtualTreeViewNode.cs`
-
-Demo app:
-- `examples/BlazorTreeView.Demo/Components/Pages/Home.razor`
 
 
 ## Demo GIF
 
 ![Lazy loading demo](demo-lazy-load.gif)
 
-Description: The GIF shows expanding a deep node, node navigation via URL query string, real-time lazy loading, and virtual scrolling with smooth scrolling enabled.  
+Description: The GIF shows expanding to a deep node, node navigation via URL query string, real-time lazy loading, and virtual scrolling with smooth scrolling enabled.  
 
-## Quick start (run the demo)
+## Demo Quick Start
 
-Requirements:
-- Targets .NET 10. 
+In your IDE, navigate to the demo source folder: `examples/BlazorTreeView.Demo`.
 
+Open the `BlazorTreeView.Demo.csproj` file, set it as the startup project, then build and run the application.
 
-From your IDE open the solution file:
-
-`BlazorVirtualTreeView.slnx`
-
-Then build and run the `BlazorTreeView.Demo` project from the IDE.
-
-## How to use the component
-
-- Provide root nodes via `Roots`.
-- Supply a child-loading callback via `LoadChildren="LoadChildrenAsync"`.
-- Use component API methods on the `@ref`-ed `VirtualTreeView<T>` instance:
-  - `SelectNodeAsync(path)`
-  - `AddNode(...)`
-  - `RemoveNode()`
-  - `RefreshSelectedAsync()`
-
-See `examples/BlazorTreeView.Demo/Components/Pages/Home.razor` for a full usage example.
-
-Note: For your own project you can just copy the class library to your solution directory and include it as a dependency for your given Blazor project. I do hope to get a Nuget package out eventually to make things even easier.
 
 
 ## Project Background
 
 This project began out of necessity.
 
-For my day job, I needed a virtualized TreeView for .NET Blazor that could handle very large data sets in a Blazor Server application. While popular UI frameworks like MudBlazor and Radzen offer feature rich TreeView components, none provided true tree view render virtualization - at least as of the time of this writing.
+For my day job, I needed a virtualized TreeView for .NET Blazor that could handle very large data sets in a Blazor Server application. While popular Open Source Blazor Component Libraries like MudBlazor and Radzen offer feature rich TreeView components, none provided true tree view render virtualization - at least as of the time of this writing.
 
-With limited time to study their project structures and source code in order to design such a feature, I decided to build a prototype myself, believing it would be faster. Within a day, I had a promising rough prototype, and after a a number of days of testing and refinement, it was released to a production environment.
+With limited time to study their project structures and source code in order to design such a feature, I decided to build a prototype myself, believing it would be faster. Within a day, I had a promising rough prototype, and after a number of days of testing and refinement, it was released to a production environment.
 
 Afterward, I wanted to take the concept further and give something back to the open-source community. I set out to turn the prototype into a clean, reusable component that others could adapt or extend in their own Blazor applications. After many hours of iteration and refinement, the project was published to GitHub-just in time for Christmas 2025. Hopefully a nice Christmas gift to someone! 
 
@@ -115,7 +113,9 @@ The original VirtualTreeView prototype used MudBlazor; however, for this project
 
 ## Contributing
 
-- Contributions are most welcome. 😊 Send over your PRs or open a GitHub issue if you're too busy for that!
+Contributions are very welcome.
+
+Feel free to submit a pull request or open a GitHub issue. If you’re short on time, issues are just as appreciated, and I’ll do my best to address them when I can 😊
 
 
 
@@ -124,27 +124,3 @@ The original VirtualTreeView prototype used MudBlazor; however, for this project
 ## License
 
 This project is licensed under the MIT License - see the `LICENSE` file for details.
-
----
-
-MIT License
-
-Copyright (c) 2025 YOUR_NAME
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
