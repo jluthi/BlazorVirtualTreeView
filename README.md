@@ -55,10 +55,17 @@ to either `Pages/App.razor` for Blazor Server **or** `wwwroot/index.html` for Bl
 - Provide root nodes via `Roots`.
 - Supply a child-loading callback via `LoadChildren="LoadChildrenAsync"`.
 - Use component API methods on the `@ref`-ed `VirtualTreeView<T>` instance as needed:
-  - `SelectNodeAsync(path)`
-  - `AddNode(...)`
-  - `RemoveNode(...)`
-  - `RefreshSelectedAsync()`
+  - `Task<bool> SelectNodeAsync(string path)` — programmatically expand ancestors, select, and scroll to a node.
+  - `void AddNode(VirtualTreeViewNode<T> newNode, VirtualTreeViewNode<T>? parentNode = null, bool selectNewNode = true)` — add a node under an explicit parent or to root if not specified.
+  - `void RemoveNode(VirtualTreeViewNode<T>? node)` — remove a node.
+  - `Task RefreshSelectedAsync()` — reload children of the currently selected node.
+  - `void ClearSelection()` — clear the current selection.
+  - `void CollapseAll()` — collapse all root nodes and any loaded descendants.
+- Common events and properties to integrate with:
+  - `EventCallback<VirtualTreeViewNode<T>> SelectedNodeChanged` — notified when selection changes.
+  - `EventCallback<(MouseEventArgs MouseArgs, VirtualTreeViewNode<T> Node)> OnNodeContextMenu` — invoked for right-click/context menu actions.
+  - `VirtualTreeView<T>.SelectedNode` — read-only property exposing the currently selected node.
+
 
 See `examples/BlazorTreeView.Demo/Components/Pages/Home.razor` for a full usage example.
 

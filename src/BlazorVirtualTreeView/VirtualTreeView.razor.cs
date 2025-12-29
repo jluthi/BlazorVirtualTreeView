@@ -428,23 +428,20 @@ namespace BlazorVirtualTreeView
 
         /// <summary>
         /// Removes the specified node from the tree.
-        /// If <paramref name="node"/> is null, the currently selected node is removed.
         /// Only affects already-materialized nodes.
         /// </summary>
         /// <param name="node">
-        /// Optional explicit node to remove. If null, the selected node is used.
         /// </param>
-        public void RemoveNode(VirtualTreeViewNode<T>? node = null)
+        public void RemoveNode(VirtualTreeViewNode<T>? node)
         {
-            var target = node ?? SelectedNode;
-            if (target == null)
-                return;
+            if (node is null)
+                throw new ArgumentNullException(nameof(node));
 
             // Never allow removing the internal root
-            if (ReferenceEquals(target, _syntheticRoot))
+            if (ReferenceEquals(node, _syntheticRoot))
                 return;
 
-            var parent = target.Parent;
+            var parent = node.Parent;
             if (parent?.Children == null)
                 return;
 
@@ -453,11 +450,11 @@ namespace BlazorVirtualTreeView
             _scrollRequested = false;
 
             // Remove from parent's children
-            if (!parent.Children.Remove(target))
+            if (!parent.Children.Remove(node))
                 return;
 
             // Clear selection if we removed it
-            if (ReferenceEquals(SelectedNode, target))
+            if (ReferenceEquals(SelectedNode, node))
                 SelectedNode = null;
 
             RebuildVisibleNodes();

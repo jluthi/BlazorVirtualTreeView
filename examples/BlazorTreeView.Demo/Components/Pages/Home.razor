@@ -497,7 +497,7 @@
     {
         if (_selectedNode != null)
         {
-            _treeView?.RemoveNode();
+            _treeView?.RemoveNode(_selectedNode.Parent);
             System.Threading.Interlocked.Decrement(ref TotalLoadedNodeCount);
         }
 
