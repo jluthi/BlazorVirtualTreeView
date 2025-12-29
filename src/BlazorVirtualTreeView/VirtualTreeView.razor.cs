@@ -86,7 +86,7 @@ namespace BlazorVirtualTreeView
         /// If true, a double-click on a node will expand or collapse it.
         /// </summary>
         [Parameter]
-        public bool ExpandOnNodeDoubleClick { get; set; } = false;
+        public bool ExpandNodeOnDoubleClick { get; set; } = false;
 
 
         // =====================================================
@@ -536,7 +536,7 @@ namespace BlazorVirtualTreeView
 
             await OnSelect(node);
 
-            if (!ExpandOnNodeDoubleClick)
+            if (!ExpandNodeOnDoubleClick)
                 await ToggleAsync(node);
 
             _suppressAutoScroll = false;
@@ -554,7 +554,7 @@ namespace BlazorVirtualTreeView
 
             await OnSelect(node);
 
-            if (ExpandOnNodeDoubleClick)
+            if (ExpandNodeOnDoubleClick)
                 await ToggleAsync(node);
 
             _suppressAutoScroll = false;
