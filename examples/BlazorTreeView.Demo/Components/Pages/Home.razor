@@ -480,7 +480,7 @@
             Text = name,
             Path = $"{parent.Path}/{name}",
             IsLeafNode = !canHaveChildren
-        });
+        }, _treeView.SelectedNode);
 
         // Keep demo counter in sync with manual additions.
         System.Threading.Interlocked.Increment(ref TotalLoadedNodeCount);

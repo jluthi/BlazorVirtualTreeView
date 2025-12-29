@@ -380,30 +380,25 @@ namespace BlazorVirtualTreeView
 
         /// <summary>
         /// Adds a new node under the specified parent node.
-        /// If <paramref name="parentNode"/> is null, the node is added under the
-        /// currently selected node; if no node is selected, it is added to the root.
+        /// If <paramref name="parentNode"/> is null, the node is added to the root.
         /// </summary>
         /// <param name="newNode">The node to add.</param>
         /// <param name="parentNode">
-        /// Optional explicit parent to attach to. If null, the selected node (or root)
-        /// is used.
+        /// Optional explicit parent to attach to. If null, the node is added to the root.
         /// </param>
         /// <param name="selectNewNode">
         /// If true, the newly added node is selected and scrolled into view.
         /// </param>
         public void AddNode(
-            VirtualTreeViewNode<T> newNode,
-            VirtualTreeViewNode<T>? parentNode = null,
-            bool selectNewNode = true)
+         VirtualTreeViewNode<T> newNode,
+         VirtualTreeViewNode<T>? parentNode = null,
+         bool selectNewNode = true)
         {
-            if (newNode == null)
+            if (newNode is null)
                 throw new ArgumentNullException(nameof(newNode));
 
-            // Resolution order:
-            // 1. Explicit parent (if provided)
-            // 2. Currently selected node
-            // 3. Synthetic root
-            var parent = parentNode ?? SelectedNode ?? _syntheticRoot;
+            // If no parent specified, attach to the internal root
+            var parent = parentNode ?? _syntheticRoot;
 
             AttachNodeInternal(newNode, parent);
             parent.IsExpanded = true;
