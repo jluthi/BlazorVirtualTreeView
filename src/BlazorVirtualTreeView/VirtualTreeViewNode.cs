@@ -44,10 +44,10 @@
     public int Level { get; internal set; }
 
     /// <summary>
-    /// Determines whether this node can have children.
-    /// Controls expander visibility and lazy loading.
+    /// Indicates whether this node is a leaf (cannot have children).
+    /// Controls expander visibility and lazy loading when inverted in component logic.
     /// </summary>
-    public bool CanHaveChildren { get; set; }
+    public bool IsLeafNode { get; set; }
 
     #endregion
 

@@ -81,6 +81,14 @@ How to adapt your data model:
 
 This flexibility means you can present hierarchical data that is not a literal filesystem but still benefits from virtualization and lazy-loading.
 
+### Node expandability and icons (`IsLeafNode`)
+
+`VirtualTreeViewNode<T>.IsLeafNode` controls both whether a node is considered expandable and which built-in icons the component displays:
+
+- `IsLeafNode == true` - the node is a leaf: it cannot be expanded, the expand/collapse affordance is hidden, and `LeafNodeIcon` is used for the main node icon.
+- `IsLeafNode == false` - the node may have children: the expand affordance is shown (when appropriate) and the component selects `CollapsedNodeIcon` or `ExpandedNodeIcon` depending on loaded/expanded state.
+
+
 ### Node Customization
 
 The tree uses **Google Material Design icons** for all built-in node rendering.  

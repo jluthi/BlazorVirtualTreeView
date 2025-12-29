@@ -164,7 +164,7 @@ namespace BlazorVirtualTreeView
         {
             Text = "Root",
             Path = string.Empty,
-            CanHaveChildren = true,
+            IsLeafNode = false,
             Level = -1
         };
 
@@ -588,7 +588,7 @@ namespace BlazorVirtualTreeView
             if (_isToggleInProgress)
                 return;
 
-            if (!node.CanHaveChildren)
+            if (node.IsLeafNode)
                 return;
 
             _isToggleInProgress = true;
@@ -708,7 +708,7 @@ namespace BlazorVirtualTreeView
         /// </summary>
         private string ResolveNodeIcon(VirtualTreeViewNode<T> node)
         {
-            if (!node.CanHaveChildren)
+            if (node.IsLeafNode)
                 return LeafNodeIcon;
 
             return (node.ChildrenLoaded && node.IsExpanded) ? ExpandedNodeIcon : CollapsedNodeIcon;
@@ -719,7 +719,7 @@ namespace BlazorVirtualTreeView
         /// </summary>
         private string ResolveExpandIcon(VirtualTreeViewNode<T> node)
         {
-            if (!node.CanHaveChildren)
+            if (node.IsLeafNode)
                 return string.Empty;
 
             if (node.IsLoading)

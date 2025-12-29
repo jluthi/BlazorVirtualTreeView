@@ -320,7 +320,7 @@
             Value = name,
             Text = name,
             Path = string.IsNullOrEmpty(parentPath) ? name : $"{parentPath}/{name}",
-            CanHaveChildren = canHaveChildren
+            IsLeafNode = !canHaveChildren
         };
     }
 
@@ -479,7 +479,7 @@
             Value = name,
             Text = name,
             Path = $"{parent.Path}/{name}",
-            CanHaveChildren = canHaveChildren
+            IsLeafNode = !canHaveChildren
         });
 
         // Keep demo counter in sync with manual additions.

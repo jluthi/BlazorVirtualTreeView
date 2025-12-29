@@ -152,7 +152,7 @@
                      style="margin-left:@(Math.Max(0, (ShowRootNode ? node.Level + 1 : node.Level)) * IndentSizePx)px">
 
                     @* Expand / collapse toggle *@
-                    @if (node.CanHaveChildren)
+                    @if (!node.IsLeafNode)
                     {
 
                         <span class="virt-tree-icon"
