@@ -13,11 +13,7 @@
      * it ensures the target row exists in the DOM so a follow-up scroll
      * (by DOM id) can safely occur.
      */
-    window.lazyTreeScrollToIndex = (containerId, index, rowHeight) => {
-        // Locate the scrollable tree container
-        const container = document.getElementById(containerId);
-        if (!container)
-            return;
+    window.lazyTreeScrollToIndex = (container, index, rowHeight) => {
 
         /**
          * Locate the first rendered tree row currently in the DOM.
@@ -49,7 +45,7 @@
          * Scroll to the estimated vertical position for the target index.
          * This ensures the row is rendered by the virtualizer.
          */
-        container.scrollTop = index * (rowHeight + offset);
+        container.scrollTop = Math.max(0, index * (rowHeight + offset));
     };
 
 
@@ -64,10 +60,7 @@
      * This is the second phase of programmatic scrolling and is responsible
      * for precise positioning and visual centering.
      */
-    window.lazyTreeScrollToNode = (containerId, nodeId, smooth, align) => {
-        // Locate the scrollable tree container
-        const container = document.getElementById(containerId);
-        if (!container) return;
+    window.lazyTreeScrollToNode = (container, nodeId, smooth, align) => {
 
         let attempts = 0;
         const maxAttempts = 20;
@@ -103,6 +96,13 @@
         tryScroll();
     };
 
+    /**
+     * Instantly scrolls the tree container to the top.
+     */
+    window.lazyTreeScrollToTop = (container) => {
+        if (container)
+            container.scrollTop = 0;
+    };
 
 </script>
 
@@ -113,7 +113,8 @@
     - overflow-y enables independent scrolling
     - id is used by JS interop for programmatic scrolling
 *@
-<div id="lazy-virt-tree-container"
+<div @ref="_containerRef"
+     id="lazy-virt-tree-container"
      class="virt-tree-container"
      style="height:@Height; overflow-y:auto; width:@Width">
 

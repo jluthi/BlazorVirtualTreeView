@@ -156,6 +156,8 @@ namespace BlazorVirtualTreeView
 
         #endregion
 
+        private ElementReference _containerRef;
+
         /// <summary>
         /// Single authoritative internal root that everything attaches to.
         /// This is never shown unless <see cref="ShowRootNode"/> is enabled (then it becomes the visible root row).
@@ -168,6 +170,7 @@ namespace BlazorVirtualTreeView
             Level = -1
         };
 
+        private bool _pendingScrollToTop;
 
         /// <summary>
         /// Currently selected node in the tree, or null when nothing is selected.
@@ -241,6 +244,16 @@ namespace BlazorVirtualTreeView
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
         {
+            if (_pendingScrollToTop)
+            {
+                _pendingScrollToTop = false;
+
+                await JS.InvokeVoidAsync(
+                    "lazyTreeScrollToTop",
+                    _containerRef);
+            }
+
+
             if (!_scrollRequested || _pendingScrollTarget == null)
                 return;
 
@@ -251,14 +264,14 @@ namespace BlazorVirtualTreeView
             {
                 await JS.InvokeVoidAsync(
                     "lazyTreeScrollToIndex",
-                    "lazy-virt-tree-container",
+                    _containerRef,
                     index,
                     RowHeight);
             }
 
             await JS.InvokeVoidAsync(
                 "lazyTreeScrollToNode",
-                "lazy-virt-tree-container",
+                _containerRef,
                 _pendingScrollTarget.DomId,
                 SmoothScrolling,
                 ScrollAlignment == ScrollAlignments.Center ? "center" : "start");
@@ -511,6 +524,10 @@ namespace BlazorVirtualTreeView
                 CollapseNodeRecursivelyLoadedOnly(root);
 
             RebuildVisibleNodes();
+
+            _pendingScrollToTop = true;
+            StateHasChanged();
+
         }
 
 
