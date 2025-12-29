@@ -37,7 +37,7 @@ Open the `BlazorTreeView.Demo.csproj` file, set it as the startup project, then 
 ## VirtualTreeView Component - Getting Started
 
 ### Prerequisites
-This component uses **Google Material Design** for built-in icons. Make sure the following stylesheet is included in your host page or default icons will not render:
+This component uses **Google Material Design** for built-in icons. Make sure the following stylesheet is included in your host page else default icons will not render.
 
 
 Add:
@@ -57,7 +57,7 @@ to either `Pages/App.razor` for Blazor Server **or** `wwwroot/index.html` for Bl
 - Use component API methods on the `@ref`-ed `VirtualTreeView<T>` instance as needed:
   - `SelectNodeAsync(path)`
   - `AddNode(...)`
-  - `RemoveNode()`
+  - `RemoveNode(...)`
   - `RefreshSelectedAsync()`
 
 See `examples/BlazorTreeView.Demo/Components/Pages/Home.razor` for a full usage example.
@@ -102,9 +102,9 @@ These parameters are used by the component's internal icon resolver (`ResolveNod
 
 ```razor
 <VirtualTreeView
-    NodeIconCollapsed="group_off"
-    NodeIconExpanded="group"
-    DefaultIcon="person" 
+    CollapsedNodeIcon="group_off"
+    ExpandedNodeIcon="group"
+    LeafNodeIcon="person" 
     .../>
 ```
 > Note: Per-node icon customization is not supported out of the box yet.

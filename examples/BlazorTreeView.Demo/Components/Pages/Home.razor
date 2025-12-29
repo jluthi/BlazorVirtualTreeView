@@ -15,7 +15,7 @@
     Home page for the Virtual Tree View demo.
     Presents controls to interact with a virtualized, lazy-loaded tree component
     and demonstrates features such as selection, navigation, context menus,
-    smooth scrolling, and URL synchronization.
+    smooth scrolling, URL synchronization, and more...
 *@
 
 <div style="width:50%">
@@ -91,6 +91,12 @@
                       Disabled="_treeView?.SelectedNode == null"
                       title="Clears the current selection highlight." />
 
+        <RadzenCheckBox @bind-Value="_showRootNode"
+                        TValue="bool"
+                        Style="margin-left:12px;" />
+
+        <span class="text-muted">Show Root Node</span>
+
         <RadzenCheckBox @bind-Value="_expandOnDoubleClick"
                         TValue="bool"
                         Style="margin-left:12px;" />
@@ -129,13 +135,16 @@
 
 
 
-@*VIRTUALIZED TREE VIEW IS HERE!*@
+@*VIRTUALIZED TREE VIEW CODE IS HERE!*@
+@* Note: This demo uses string as T (type). Replace T with your domain model and
+   update the LoadChildrenAsync signature accordingly (or whatever your equivalent method will be called). *@
 <VirtualTreeView @ref="_treeView"
                  Height="800px"
                  Width="30%"
-                 T="DemoNode"
+                 T="string"
                  Roots="@Roots"
                  LoadChildren="LoadChildrenAsync"
+                 ShowRootNode="@_showRootNode"
                  Size="VirtualTreeViewSize.Medium"
                  SmoothScrolling="@_smoothScroll"
                  ScrollAlignment="ScrollAlignments.Center"
@@ -145,7 +154,7 @@
 
 @code
 {
-    #region Constants
+    #region Demo Node Generation Constants
 
     // Parameters used to generate the demo tree structure.
     private const int RootCount = 50;
@@ -159,21 +168,24 @@
 
     #endregion
 
+
+
     #region State
 
     // Shared random instance for demo behaviors.
     private static readonly Random _rand = Random.Shared;
 
     // Reference to the VirtualTreeView component instance so we can call API methods.
-    private VirtualTreeView<DemoNode>? _treeView;
-    private VirtualTreeViewNode<DemoNode>? _selectedNode;
+    private VirtualTreeView<string>? _treeView;
+    private VirtualTreeViewNode<string>? _selectedNode;
 
     // Roots provided to the component. Generated on initialization.
-    private IReadOnlyList<VirtualTreeViewNode<DemoNode>> Roots = Array.Empty<VirtualTreeViewNode<DemoNode>>();
+    private IReadOnlyList<VirtualTreeViewNode<string>> Roots = Array.Empty<VirtualTreeViewNode<string>>();
 
     // UI state flags
-    private bool _syncSelectionToUrl;
-    private bool _expandOnDoubleClick;
+    private bool _syncSelectionToUrl = false;
+    private bool _showRootNode = false;
+    private bool _expandOnDoubleClick = false;
     private bool _smoothScroll = true;
 
     // Simulated load delay in milliseconds for lazy loading children
@@ -185,7 +197,8 @@
 
     #endregion
 
-    #region Lifecycle
+
+    #region Page Lifecycle
 
     /// <summary>
     /// Generate the initial root nodes when the component initializes.
@@ -224,30 +237,39 @@
 
     #endregion
 
+
     #region Tree Loading
 
     /// <summary>
     /// Callback used by the VirtualTreeView to lazily load children for a node.
-    /// Simulates latency using <see cref="_loadDelayMs"/> and stops at <see cref="MaxDepth"/>.
     /// </summary>
-    private async Task<IReadOnlyList<VirtualTreeViewNode<DemoNode>>> LoadChildrenAsync(
-        VirtualTreeViewNode<DemoNode> parent)
+    private async Task<IReadOnlyList<VirtualTreeViewNode<string>>> LoadChildrenAsync(
+        VirtualTreeViewNode<string> parent)
     {
+        // NOTE:
+        // In a real application, your data access logic (API call, database query,
+        // file system lookup, etc.) would typically live here.
+        // All code below exists purely to simulate latency and generate demo data.
+
+
+
+        // Simulate asynchronous data retrieval to mimic real-world latency
+        // (e.g., network or database access).
         if (_loadDelayMs > 0)
             await Task.Delay(_loadDelayMs);
 
-        if (parent.Value.Depth >= MaxDepth)
-            return Array.Empty<VirtualTreeViewNode<DemoNode>>();
+        // Stop generating children once the maximum configured depth is reached.
+        // Returning an empty collection marks this node as a leaf.
+        if (parent.Level >= MaxDepth)
+            return Array.Empty<VirtualTreeViewNode<string>>();
 
-        var nodes = GenerateNodes(
+        // Generate the next level of children. The depth is incremented so that
+        // node names and paths accurately reflect their position in the hierarchy.
+        return GenerateNodes(
             parent.Path,
-            parent.Value.Depth + 1,
+            parent.Level + 1,
             ChildrenPerNode);
 
-        // Ensure UI reflects updated count after asynchronous load.
-        await InvokeAsync(StateHasChanged);
-
-        return nodes;
     }
 
     /// <summary>
@@ -256,12 +278,12 @@
     /// and leaf nodes (files) based on configured caps per level.
     /// Also updates the demo-wide TotalLoadedNodeCount whenever nodes are created.
     /// </summary>
-    private IReadOnlyList<VirtualTreeViewNode<DemoNode>> GenerateNodes(
+    private IReadOnlyList<VirtualTreeViewNode<string>> GenerateNodes(
         string parentPath,
         int depth,
         int count)
     {
-        var list = new List<VirtualTreeViewNode<DemoNode>>(count);
+        var list = new List<VirtualTreeViewNode<string>>(count);
 
         int folderCount = Math.Min(ChildrenCapablePerLevel, count);
         int leafCount = Math.Min(LeafOnlyPerLevel, count - folderCount);
@@ -283,7 +305,7 @@
     /// <summary>
     /// Creates an individual VirtualTreeViewNode with path and metadata.
     /// </summary>
-    private VirtualTreeViewNode<DemoNode> CreateNode(
+    private VirtualTreeViewNode<string> CreateNode(
         string parentPath,
         int depth,
         int index,
@@ -293,9 +315,9 @@
             ? $"D{depth}_N{index}"
             : $"D{depth}_N{index}.example";
 
-        return new VirtualTreeViewNode<DemoNode>
+        return new VirtualTreeViewNode<string>
         {
-            Value = new DemoNode { Name = name, Depth = depth },
+            Value = name,
             Text = name,
             Path = string.IsNullOrEmpty(parentPath) ? name : $"{parentPath}/{name}",
             CanHaveChildren = canHaveChildren
@@ -310,7 +332,7 @@
     /// Handler invoked when the currently selected node changes in the component.
     /// If URL sync is enabled, update the query string to reflect the selected node.
     /// </summary>
-    private Task OnSelectedNodeChanged(VirtualTreeViewNode<DemoNode>? node)
+    private Task OnSelectedNodeChanged(VirtualTreeViewNode<string>? node)
     {
         _selectedNode = node;
 
@@ -354,9 +376,11 @@
 
         for (int d = 0; d <= targetDepth; d++)
         {
-            int index = d == 0
-                ? Random.Shared.Next(0, RootCount)
-                : Random.Shared.Next(0, ChildrenCapablePerLevel);
+            int maxIndex = d == 0
+                ? RootCount                          // roots are all expandable
+                : ChildrenCapablePerLevel;           // ONLY folders
+
+            int index = Random.Shared.Next(0, maxIndex);
 
             segments.Add($"D{d}_N{index}");
         }
@@ -364,7 +388,23 @@
         return string.Join('/', segments);
     }
 
+
+    private void CollapseAll() => _treeView?.CollapseAll();
+    private void ClearSelection() => _treeView?.ClearSelection();
+
+    /// <summary>
+    /// Handle toggling URL sync. When disabled the query string is cleared.
+    /// </summary>
+    private void OnUrlSyncToggled(bool value)
+    {
+        _syncSelectionToUrl = value;
+
+        if (!value)
+            NavigationManager.NavigateTo(NavigationManager.BaseUri, replace: true);
+    }
+
     #endregion
+
 
     #region Context Menu Actions
 
@@ -373,7 +413,7 @@
     /// The menu provides actions such as copying path, refreshing, adding and deleting nodes.
     /// </summary>
     private Task OnNodeContextMenu(
-        (MouseEventArgs MouseArgs, VirtualTreeViewNode<DemoNode> Node) args)
+        (MouseEventArgs MouseArgs, VirtualTreeViewNode<string> Node) args)
     {
         ContextMenuService.Open(args.MouseArgs, ds =>
         @<RadzenMenu>
@@ -392,7 +432,7 @@
     /// <summary>
     /// Copies a link containing the node path to the clipboard and shows a notification.
     /// </summary>
-    private async Task CopyPath(VirtualTreeViewNode<DemoNode> node)
+    private async Task CopyPath(VirtualTreeViewNode<string> node)
     {
         var url = $"{NavigationManager.BaseUri}?node={Uri.EscapeDataString(node.Path)}";
         await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", url);
@@ -410,7 +450,7 @@
     /// Refreshes the currently selected node by reloading its children from the source.
     /// Ensures the node is selected first if it isn't already.
     /// </summary>
-    private async Task RefreshNode(VirtualTreeViewNode<DemoNode> node)
+    private async Task RefreshNode(VirtualTreeViewNode<string> node)
     {
         if (_treeView == null)
             return;
@@ -426,17 +466,17 @@
     /// Adds a new child under the provided parent node. The demo assigns a random
     /// "folder" vs "file" behavior to the new node.
     /// </summary>
-    private void AddChild(VirtualTreeViewNode<DemoNode> parent)
+    private void AddChild(VirtualTreeViewNode<string> parent)
     {
         if (_treeView == null)
             return;
 
         bool canHaveChildren = _rand.Next(0, 10) < 6;
         var name = $"New_{DateTime.Now:HHmmss}" + (canHaveChildren ? "" : ".example");
-
-        _treeView.AddNode(new VirtualTreeViewNode<DemoNode>
+        
+        _treeView.AddNode(new VirtualTreeViewNode<string>
         {
-            Value = new DemoNode { Name = name, Depth = parent.Value.Depth + 1 },
+            Value = name,
             Text = name,
             Path = $"{parent.Path}/{name}",
             CanHaveChildren = canHaveChildren
@@ -466,34 +506,5 @@
 
     #endregion
 
-    #region Utilities
-
-    private void CollapseAll() => _treeView?.CollapseAll();
-    private void ClearSelection() => _treeView?.ClearSelection();
-
-    /// <summary>
-    /// Handle toggling URL sync. When disabled the query string is cleared.
-    /// </summary>
-    private void OnUrlSyncToggled(bool value)
-    {
-        _syncSelectionToUrl = value;
-
-        if (!value)
-            NavigationManager.NavigateTo(NavigationManager.BaseUri, replace: true);
-    }
-
-    #endregion
-
-    /// <summary>
-    /// Simple demo value type representing node data.
-    /// Kept private to the page component because it's only used by the demo.
-    /// </summary>
-    private sealed class DemoNode
-    {
-        /// <summary>The display name for the node.</summary>
-        public string Name { get; init; } = string.Empty;
-
-        /// <summary>Depth of the node in the tree (0-based).</summary>
-        public int Depth { get; init; }
-    }
+  
 }

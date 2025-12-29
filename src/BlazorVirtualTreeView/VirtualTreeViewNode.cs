@@ -41,7 +41,7 @@
     /// <summary>
     /// Depth level in the tree (root = 0).
     /// </summary>
-    internal int Level { get; set; }
+    public int Level { get; internal set; }
 
     /// <summary>
     /// Determines whether this node can have children.
