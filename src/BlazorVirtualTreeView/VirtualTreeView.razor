@@ -176,17 +176,28 @@
                     }
 
 
-                    @* Main node icon (consumer-defined) *@
-                    <span class="virt-tree-node-icon material-symbols-outlined"
-                          style="font-size:@($"{IconSizePx}px")">
-                        @ResolveNodeIcon(node)
-                    </span>
+                    @if (NodeTemplate != null)
+                    {
+                        @NodeTemplate(node)
+                    }
+                    else
+                    {
+                        <!-- DEFAULT RENDERING -->
+                        @* Main node icon (consumer-defined) *@
+                        <span class="virt-tree-node-icon material-symbols-outlined"
+                              style="font-size:@($"{IconSizePx}px")">
+                            @ResolveNodeIcon(node)
+                        </span>
 
-                    @* Display text for the node *@
-                    <span class="virt-tree-text"
-                          style="font-size:@($"{IconSizePx - 2}px")">
-                        @node.Text
-                    </span>
+                        @* Display text for the node *@
+                        <span class="virt-tree-text"
+                              style="font-size:@($"{IconSizePx - 2}px")">
+                            @node.Text
+                        </span>
+
+                    }
+
+
 
                 </div>
             </div>

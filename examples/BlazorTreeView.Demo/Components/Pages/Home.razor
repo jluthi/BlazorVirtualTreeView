@@ -150,7 +150,49 @@
                  ScrollAlignment="ScrollAlignments.Center"
                  ExpandNodeOnDoubleClick="@_expandOnDoubleClick"
                  SelectedNodeChanged="OnSelectedNodeChanged"
-                 OnNodeContextMenu="OnNodeContextMenu" />
+                 OnNodeContextMenu="OnNodeContextMenu">
+
+    @* Optional: Provide a custom per-node template to tailor the node look and feel to your needs. Uncomment the code below for an example. 
+       - Context: `node` is a `VirtualTreeViewNode<T>` (here `T = string` is defined above, but normally you would use whatever custom object model you wish to bind to).
+       - Available public properties on `VirtualTreeViewNode<T>`:
+           - `string DomId { get; }`                — stable DOM id for virtualization/scroll targeting
+           - `string Path { get; init; }`           — hierarchical path (e.g. "a/b/c")
+           - `T Value { get; init; }`               — user-defined domain object bound to the node
+           - `string Text { get; set; }`            — display text shown in the tree
+           - `VirtualTreeViewNode<T>? Parent { get; internal set; }` — parent reference
+           - `int Level { get; internal set; }`     — depth level in the tree (root = 0)
+           - `bool IsLeafNode { get; set; }`        — whether this node can have children or not. Leaf nodes do not.
+           - `bool IsExpanded { get; internal set; }` — whether the node is currently expanded
+           - `List<VirtualTreeViewNode<T>>? Children { get; internal set; }` — lazily-loaded children (null = not loaded yet)
+
+       Notes:
+       - `Children == null` typically means children are not yet loaded; an empty list means no children.
+       - Templates are created/destroyed frequently due to virtualization — keep markup simple and avoid heavy work.
+    *@
+    @*     
+    <NodeTemplate Context="node">
+        <div style="display:flex;align-items:center;gap:8px;width:100%;">
+            <!-- Icon -->
+            <span class="material-symbols-outlined" style="font-size:20px;flex:0 0 auto;">
+                @(node.IsLeafNode ? "description" : (node.IsExpanded ? "folder_open" : "folder"))
+            </span>
+
+            <!-- Text (ellipsis-safe) -->
+            <div style="flex:1 1 auto;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">
+                @node.Text
+            </div>
+
+            <!-- Right-aligned badge: shows child count or loading spinner -->
+            <div style="flex:0 0 auto;margin-left:8px;display:inline-flex;align-items:center;">
+                    <span style="background:#f1f3f5;border-radius:999px;padding:2px 8px;font-size:0.75rem;color:#495057;border:1px solid rgba(0,0,0,0.06);">
+                        @(node.Children == null ? "-" : node.Children.Count.ToString())
+                    </span>
+            </div>
+        </div>
+    </NodeTemplate>  
+    *@
+
+</VirtualTreeView>
 
 @code
 {

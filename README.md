@@ -78,7 +78,6 @@ Although the demo shows a folder / subfolder style tree, the component is data-a
 - Case management: `cases/2025/12345/documents`
 - Organizational charts: `company/division/team/member`
 - Product categories and SKUs: `electronics/phones/brand/model`
-- Dependency graphs (flattened into a navigable path)
 - Time-based buckets: `2025/Q1/Week12/Events`
 
 How to adapt your data model:
@@ -89,7 +88,7 @@ How to adapt your data model:
 
 This flexibility means you can present hierarchical data that is not a literal filesystem but still benefits from virtualization and lazy-loading.
 
-### Node expandability and icons (`IsLeafNode`)
+**Additional Information about expandability and icons (`IsLeafNode`)**
 
 `VirtualTreeViewNode<T>.IsLeafNode` controls both whether a node is considered expandable and which built-in icons the component displays:
 
@@ -104,17 +103,19 @@ Each icon is defined by a Material icon name (string), and you can override any 
 
 The component provides simple, built-in icon controls and is easy to customize:
 
-- **Component-level parameters (Material icon names):**
+- Component-level parameters (Material icon names):
   - `CollapsedNodeIcon` – icon used for nodes that can have children but are currently collapsed  
-    *(default: `"folder"`)*
+    *(default: `"folder"`)*  
   - `ExpandedNodeIcon` – icon used for nodes that have children and are expanded  
-    *(default: `"folder_open"`)*
+    *(default: `"folder_open"`)*  
   - `LeafNodeIcon` – icon used for leaf nodes  
     *(default: `"description"`)*
 
-These parameters are used by the component's internal icon resolver (`ResolveNodeIcon` and `ResolveExpandIcon`) to choose which icon string to render for each row. Example usage in markup:
+These parameters are used by the component's internal icon resolver to choose which icon string to render for each row.
+<br/>
+*Note: These parameters are of course ignored if you provide a custom `NodeTemplate` render fragment.*
 
-*Override Default Icons Example:*
+Override Default Icons Example:
 
 ```razor
 <VirtualTreeView
@@ -123,10 +124,31 @@ These parameters are used by the component's internal icon resolver (`ResolveNod
     LeafNodeIcon="person" 
     .../>
 ```
-> Note: Per-node icon customization is not supported out of the box yet.
-If you need per-node icons today, you can extend the node model and customize the rendering logic. Currently exploring first-class per-node icon support in a future release, since nodes can represent arbitrary domain data. Things may change here a lot in regard to icon overriding and handling. 
 
+**Render Fragment (Per-node Template)**
 
+The `VirtualTreeView` supports a `NodeTemplate` render fragment so you can fully customize how each node is rendered. The template receives a `VirtualTreeViewNode<T>` as `Context` and should stay lightweight because templates are created/destroyed frequently due to virtualization.
+
+Short example:
+
+```
+<VirtualTreeView ... >
+    <NodeTemplate Context="node">
+        <div style="display:flex;align-items:center;gap:8px;width:100%;">
+            <span class="material-symbols-outlined" style="font-size:20px;flex:0 0 auto;">
+                @(node.IsLeafNode ? "description" : (node.IsExpanded ? "folder_open" : "folder"))
+            </span>
+            <div style="flex:1 1 auto;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">
+                @node.Text
+            </div>
+        </div>
+    </NodeTemplate>
+</VirtualTreeView>
+```
+
+<br/>
+
+*Note: The Expand Icon (Expand/Collapse Arrow) is still rendered by the component outside of the node template. No customization of this icon is publicly supported or planned at this time.*
 
 ## Project Background
 

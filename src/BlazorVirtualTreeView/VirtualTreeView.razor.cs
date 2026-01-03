@@ -17,6 +17,15 @@ namespace BlazorVirtualTreeView
 
         #region Parameters
 
+        /// <summary>
+        /// Optional Razor template used to render a node.
+        /// If not provided, the default built-in renderer is used.
+        /// </summary>
+        [Parameter]
+        public RenderFragment<VirtualTreeViewNode<T>>? NodeTemplate { get; set; }
+
+
+
         // =====================================================
         // Data & required inputs
         // =====================================================
