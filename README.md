@@ -131,7 +131,7 @@ The `VirtualTreeView` supports a `NodeTemplate` render fragment so you can fully
 
 Short example:
 
-```
+```razor
 <VirtualTreeView ... >
     <NodeTemplate Context="node">
         <div style="display:flex;align-items:center;gap:8px;width:100%;">
