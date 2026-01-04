@@ -377,6 +377,25 @@ namespace BlazorVirtualTreeView
             _suppressAutoScroll = true;
             try
             {
+                // If the synthetic root is visible but currently collapsed, expand it first so
+                // descendant root nodes become materialized and visible for subsequent toggles.
+                if (ShowRootNode && !_syntheticRoot.IsExpanded)
+                {
+                    var prevSuppress = _suppressAutoScroll;
+                    // Allow the viewport to follow the expansion of the synthetic root.
+                    _suppressAutoScroll = false;
+                    QueueScrollToNode(_syntheticRoot);
+                    await InvokeAsync(StateHasChanged);
+                    await Task.Yield();
+                    _suppressAutoScroll = prevSuppress;
+
+                    await ToggleAsync(_syntheticRoot);
+
+                    // Let the UI stabilize after toggling the synthetic root.
+                    await InvokeAsync(StateHasChanged);
+                    await Task.Yield();
+                }
+
                 // Ensure the root is expanded / its children are loaded.
                 if (!current.IsExpanded)
                     await ToggleAsync(current);
@@ -580,17 +599,25 @@ namespace BlazorVirtualTreeView
 
         /// <summary>
         /// Collapses all root nodes and their loaded descendants in the tree, hiding their child nodes from view.
+        /// By default this also collapses the internal synthetic root; set <paramref name="keepImplicitRootExpanded"/>
+        /// to true to preserve the synthetic root's expanded state.
         /// </summary>
+        /// <param name="keepImplicitRootExpanded">If true, the internal synthetic root remains expanded.</param>
         /// <remarks>This method affects only nodes that are currently loaded. Unloaded or virtualized
         /// nodes are not affected. After calling this method, only the root nodes will remain visible in the
-        /// tree.</remarks>
-        public void CollapseAll()
+        /// tree (unless <paramref name="keepImplicitRootExpanded"/> is true).</remarks>
+        public void CollapseAll(bool keepImplicitRootExpanded = false)
         {
             _pendingScrollTarget = null;
             _scrollRequested = false;
 
             foreach (var root in Roots)
                 CollapseNodeRecursivelyLoadedOnly(root);
+
+            if (!keepImplicitRootExpanded)
+            {
+                CollapseNodeRecursivelyLoadedOnly(_syntheticRoot);
+            }
 
             RebuildVisibleNodes();
 
