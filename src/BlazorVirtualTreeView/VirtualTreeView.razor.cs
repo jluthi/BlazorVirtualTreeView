@@ -153,13 +153,13 @@ namespace BlazorVirtualTreeView
         /// Default is <see cref="ScrollAlignments.Center"/>.
         /// </summary>
         [Parameter]
-        public ScrollAlignments ScrollAlignment { get; set; } = ScrollAlignments.Center;
+        public ScrollAlignments ScrollAlignment { get; set; } = ScrollAlignments.Top;
 
         /// <summary>
         /// When true, programmatic scrolling uses smooth animated scrolling where supported.
         /// </summary>
         [Parameter]
-        public bool SmoothScrolling { get; set; } = true;
+        public bool DisableSmoothScrolling { get; set; } = false;
 
 
 
@@ -185,11 +185,12 @@ namespace BlazorVirtualTreeView
         /// Currently selected node in the tree, or null when nothing is selected.
         /// Read-only; use <see cref="SelectedNodeChanged"/> event and component APIs to update.
         /// </summary>
-        public VirtualTreeViewNode<T>? SelectedNode {get; internal set;}
+        public VirtualTreeViewNode<T>? SelectedNode { get; internal set; }
 
         private VirtualTreeViewNode<T>? _pendingScrollTarget;
 
         private bool _scrollRequested;
+        private bool _keyboardNavigationRequested;
         private bool _isToggleInProgress;
         private bool _suppressAutoScroll;
 
@@ -278,12 +279,47 @@ namespace BlazorVirtualTreeView
                     RowHeight);
             }
 
-            await JS.InvokeVoidAsync(
-                "lazyTreeScrollToNode",
-                _containerRef,
-                _pendingScrollTarget.DomId,
-                SmoothScrolling,
-                ScrollAlignment == ScrollAlignments.Center ? "center" : "start");
+            // After the index-based materialization, use a robust ensure-visible routine
+            // for keyboard navigation to avoid clipping; fall back to scrollToNode otherwise.
+            if (_keyboardNavigationRequested)
+            {
+                // If consumer requested center alignment, always center during keyboard navigation.
+                if (ScrollAlignment == ScrollAlignments.Center)
+                {
+                    // Use a direct scrollToNode with center alignment (non-smooth for keyboard ops).
+                    await JS.InvokeVoidAsync(
+                        "lazyTreeScrollToNode",
+                        _containerRef,
+                        _pendingScrollTarget.DomId,
+                        false, // non-smooth for keyboard
+                        "center");
+                }
+                else
+                {
+                    // Use padding equal to a row height so the keyboard-focused item doesn't end up just out of view.
+                    int topPaddingPx = RowHeight + (RowHeight / 2);
+                    await JS.InvokeVoidAsync(
+                        "lazyTreeScrollEnsureTopVisible",
+                        _containerRef,
+                        _pendingScrollTarget.DomId,
+                        topPaddingPx); // non-smooth for keyboard
+                }
+            }
+            else
+            {
+                bool smooth = !DisableSmoothScrolling;
+                string align = ScrollAlignment == ScrollAlignments.Center ? "center" : "start";
+
+                await JS.InvokeVoidAsync(
+                    "lazyTreeScrollToNode",
+                    _containerRef,
+                    _pendingScrollTarget.DomId,
+                    smooth,
+                    align);
+            }
+
+            // Clear keyboard flag after performing the scroll
+            _keyboardNavigationRequested = false;
         }
 
 
@@ -395,6 +431,10 @@ namespace BlazorVirtualTreeView
                     // Force a render so OnAfterRenderAsync runs and the JS scroll is invoked.
                     // Virtualize needs at least one render pass to materialize the target DOM row.
                     await InvokeAsync(StateHasChanged);
+
+                    // Ensure the tree container receives focus so keyboard navigation works.
+                    // Use JS interop helper to avoid ElementReference.FocusAsync compatibility issues.
+                    await JS.InvokeVoidAsync("lazyTreeFocus", _containerRef);
                 }
             }
         }
@@ -599,7 +639,7 @@ namespace BlazorVirtualTreeView
         }
 
         /// <summary>
-        /// The internal handler for toggling a node's expanded/collapsed state and whether to load its children.
+        /// The internal handler for toggling a node's expanded/ccollapsed state and whether to load its children.
         /// </summary>
         private async Task ToggleAsync(VirtualTreeViewNode<T> node)
         {
@@ -749,6 +789,165 @@ namespace BlazorVirtualTreeView
             return node.IsExpanded ? "expand_more" : "chevron_right";
         }
 
+        /// <summary>
+        /// Handles keyboard navigation on the tree container.
+        /// Left/Right operate on the parent node: left collapses, right expands into the selected node or first child.
+        /// Up/Down move selection through the visible list and scroll when off-screen.
+        /// </summary>
+        private async Task HandleKeyDown(KeyboardEventArgs e)
+        {
+            if (e is null)
+                return;
+
+            // Handle navigation keys.
+            switch (e.Key)
+            {
+                case "ArrowLeft":
+                    await HandleArrowLeftAsync();
+                    break;
+
+                case "ArrowRight":
+                    await HandleArrowRightAsync();
+                    break;
+
+                case "ArrowUp":
+                    await HandleArrowUpAsync();
+                    break;
+
+                case "ArrowDown":
+                    await HandleArrowDownAsync();
+                    break;
+            }
+        }
+
+        private async Task HandleArrowLeftAsync()
+        {
+            var parent = SelectedNode?.Parent;
+            if (parent == null)
+                return;
+
+            // Do not attempt to toggle the internal synthetic root if it's not shown.
+            if (ReferenceEquals(parent, _syntheticRoot) && !ShowRootNode)
+                return;
+
+            // If parent is expanded, collapse it. Otherwise move selection to parent.
+            if (parent.IsExpanded)
+            {
+                if (!_isToggleInProgress)
+                    await ToggleAsync(parent);
+
+                await OnSelect(parent);
+                QueueScrollToNode(parent, keyboard: true);
+                await InvokeAsync(StateHasChanged);
+            }
+            else
+            {
+                // Parent already collapsed — move selection up to parent.
+                await OnSelect(parent);
+                QueueScrollToNode(parent, keyboard: true);
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+
+        private async Task HandleArrowRightAsync()
+        {
+            var node = SelectedNode;
+            if (node == null)
+                return;
+
+            // If selected node is synthetic root and not shown, ignore.
+            if (ReferenceEquals(node, _syntheticRoot) && !ShowRootNode)
+                return;
+
+            // If the selected node can have children and is collapsed -> expand it.
+            if (!node.IsLeafNode && !node.IsExpanded)
+            {
+                if (!_isToggleInProgress)
+                    await ToggleAsync(node);
+
+                // Keep selection on the node after expanding.
+                QueueScrollToNode(node, keyboard: true);
+                await InvokeAsync(StateHasChanged);
+                return;
+            }
+
+            // If already expanded, move into first child (if any).
+            if (!node.IsLeafNode && node.IsExpanded && node.Children != null && node.Children.Count > 0)
+            {
+                var firstChild = node.Children[0];
+                await OnSelect(firstChild);
+                QueueScrollToNode(firstChild, keyboard: true);
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+
+        private async Task HandleArrowUpAsync()
+        {
+            if (_visibleNodes == null || _visibleNodes.Count == 0)
+                return;
+
+            int currentIndex = SelectedNode == null
+                ? _visibleNodes.Count // will decrement to last
+                : _visibleNodes.IndexOf(SelectedNode);
+
+            VirtualTreeViewNode<T>? target = null;
+
+            if (currentIndex <= 0)
+            {
+                // If at the start or not found, wrap to first element (or simply do nothing).
+                // Choose to move to last when no selection, otherwise stay at first.
+                if (SelectedNode == null)
+                    target = _visibleNodes[^1];
+                else
+                    target = _visibleNodes[0];
+            }
+            else
+            {
+                target = _visibleNodes[currentIndex - 1];
+            }
+
+            if (target == null)
+                return;
+
+            await OnSelect(target);
+            QueueScrollToNode(target, keyboard: true);
+            await InvokeAsync(StateHasChanged);
+        }
+
+        private async Task HandleArrowDownAsync()
+        {
+            if (_visibleNodes == null || _visibleNodes.Count == 0)
+                return;
+
+            int currentIndex = SelectedNode == null
+                ? -1
+                : _visibleNodes.IndexOf(SelectedNode);
+
+            VirtualTreeViewNode<T>? target = null;
+
+            if (currentIndex < 0)
+            {
+                // No current selection — move to the first visible node.
+                target = _visibleNodes[0];
+            }
+            else if (currentIndex >= _visibleNodes.Count - 1)
+            {
+                // Already at the end — nothing to do.
+                return;
+            }
+            else
+            {
+                target = _visibleNodes[currentIndex + 1];
+            }
+
+            if (target == null)
+                return;
+
+            await OnSelect(target);
+            QueueScrollToNode(target, keyboard: true);
+            await InvokeAsync(StateHasChanged);
+        }
+
         #endregion
 
 
@@ -779,6 +978,22 @@ namespace BlazorVirtualTreeView
 
             _pendingScrollTarget = node;
             _scrollRequested = true;
+            _keyboardNavigationRequested = false;
+        }
+
+        /// <summary>
+        /// Queues a request to scroll the view to the specified node in the virtual tree.
+        /// When <paramref name="keyboard"/> is true the scroll will use immediate/non-smooth
+        /// behavior and "nearest" alignment to avoid visual jiggle for keyboard navigation.
+        /// </summary>
+        private void QueueScrollToNode(VirtualTreeViewNode<T> node, bool keyboard)
+        {
+            if (_suppressAutoScroll)
+                return;
+
+            _pendingScrollTarget = node;
+            _scrollRequested = true;
+            _keyboardNavigationRequested = keyboard;
         }
 
         /// <summary>

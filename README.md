@@ -8,11 +8,12 @@ Target Framework: .NET 10+
 
 _NuGet package coming soon*_
 
-## Key features
+## 💫 Key features
 
 - <u>Virtualization (<u>Key Feature</u>)</u>: Only visible rows are rendered, keeping the DOM small and scrolling responsive with both small and large datasets.
 - <u>Lazy Loading</u>: Children are requested on expansion using a `LoadChildren` callback method.
 - <u>Programmatic Navigation</u>: Expands ancestors, selects, and focuses a given node via the `SelectNodeAsync` method.
+- <u>Keyboard Navigation</u>: Full keyboard support for navigating, expanding/collapsing, and selecting nodes.
 - <u>Context Menu Support</u>: Integrate with custom or third-party right-click context menus using `OnNodeContextMenu`, passing `Microsoft.AspNetCore.Components.Web.MouseEventArgs`.
 - <u>Performance & Style Customizations</u>: A variety of exposed parameters to fine-tune look and feel.
 
@@ -20,13 +21,13 @@ See the demo app in `examples/BlazorTreeView.Demo` for a working example.
 
 > The demo app included here was built using Radzen demo components (buttons, sliders, menus, etc.) for convenience; however, any Blazor component library should work with this component.
 
-## Demo GIF
+## 🖼️ Demo
 
 ![Lazy loading demo](demo.gif)
 
 Description: The GIF shows expanding to a deep node, node navigation via URL query string, real-time lazy loading, and virtual scrolling with smooth scrolling enabled.  
 
-## Run Demo (Optional)
+### Run Demo (Optional)
 
 In your IDE, navigate to the demo source folder: `examples/BlazorTreeView.Demo`.
 
@@ -34,7 +35,7 @@ Open the `BlazorTreeView.Demo.csproj` file, set it as the startup project, then 
 
 
 
-## VirtualTreeView Component - Getting Started
+## 🚀 VirtualTreeView Component - Getting Started
 
 ### Prerequisites
 This component uses **Google Material Design** for built-in icons. Make sure the following stylesheet is included in your host page else default icons will not render.
@@ -50,7 +51,7 @@ to either `Pages/App.razor` for Blazor Server **or** `wwwroot/index.html` for Bl
 
 
 
-### Basic Usage
+### ℹ️ Basic Usage
 
 - Provide root nodes via `Roots`.
 - Supply a child-loading callback via `LoadChildren="LoadChildrenAsync"`.
@@ -61,17 +62,20 @@ to either `Pages/App.razor` for Blazor Server **or** `wwwroot/index.html` for Bl
   - `RefreshSelectedAsync()` - reload children of the currently selected node.
   - `ClearSelection()` - clear the current selection.
   - `CollapseAll()` - collapse all root nodes and any loaded descendants.
-- Common events and properties to integrate with:
+- Common properties to set:
+  - `Size` - set the height of the tree view container.
+  - `DisableSmoothScrolling` - disable smooth scrolling behavior (go instantly to target position).
+  - `ScrollAlignment` - control how selected nodes are aligned when programmatically scrolled into view.
+- Common events to listen for:
   - `SelectedNodeChanged` - notified when selection changes.
   - `OnNodeContextMenu` - invoked for right-click/context menu actions.
   - `VirtualTreeView<T>.SelectedNode` - read-only property exposing the currently selected node.
-  -  And more...
 
 
 See `examples/BlazorTreeView.Demo/Components/Pages/Home.razor` for a full usage example.
 
 
-### Node Flexibility
+### 🏃🏽‍♂️ Node Flexibility
 
 Although the demo shows a folder / subfolder style tree, the component is data-agnostic and supports any hierarchical model that can be expressed with a stable `Path` per node and a `CanHaveChildren` flag. Examples beyond filesystem-style folders:
 
@@ -96,7 +100,7 @@ This flexibility means you can present hierarchical data that is not a literal f
 - `IsLeafNode == false` - the node may have children: the expand affordance is shown (when appropriate) and the component selects `CollapsedNodeIcon` or `ExpandedNodeIcon` depending on loaded/expanded state.
 
 
-### Node Customization
+### 👕 Node Customization
 
 The tree uses **Google Material Design icons** for all built-in node rendering.  
 Each icon is defined by a Material icon name (string), and you can override any or all of them with any valid Google Material Design icon.
@@ -150,7 +154,7 @@ Short example:
 
 *Note: The Expand Icon (Expand/Collapse Arrow) is still rendered by the component outside of the node template. No customization of this icon is publicly supported or planned at this time.*
 
-## Project Background
+## 📖 Project Background
 
 This project began out of necessity.
 
@@ -163,7 +167,7 @@ Afterward, I wanted to take the concept further and give something back to the o
 The original VirtualTreeView prototype used MudBlazor; however, for this project, even though the demo is built with Radzen, the core VirtualTreeView was intentionally designed to be library-agnostic and should work with virtually any Blazor UI framework. More refinement to come. 
 
 
-## Contributing
+## 📃 Contributing
 
 Contributions are very welcome.
 
@@ -173,6 +177,6 @@ Feel free to submit a pull request or open a GitHub issue. If you’re short on 
 
 
 
-## License
+## 🤵🏽 License
 
 This project is licensed under the MIT License - see the `LICENSE` file for details.

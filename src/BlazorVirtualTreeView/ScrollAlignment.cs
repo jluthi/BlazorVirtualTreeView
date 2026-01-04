@@ -6,7 +6,7 @@ namespace BlazorVirtualTreeView
 {
     public enum ScrollAlignments
     {
-        Center,
-        Top
+        Top,
+        Center
     }
 }

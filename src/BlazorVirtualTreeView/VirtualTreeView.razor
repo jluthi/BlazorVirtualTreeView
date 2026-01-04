@@ -50,7 +50,7 @@
 
 
 
-    /**
+     /**
      * Scrolls the tree to a specific node by DOM id.
      *
      * This function assumes the node may not yet exist in the DOM due to
@@ -61,7 +61,7 @@
      * for precise positioning and visual centering.
      */
     window.lazyTreeScrollToNode = (container, nodeId, smooth, align) => {
-
+        console.log(smooth);
         let attempts = 0;
         const maxAttempts = 20;
 
@@ -96,6 +96,52 @@
         tryScroll();
     };
 
+
+
+    /**
+     * Ensures the node is fully visible inside the container, with a top padding.
+     * Simplified for the single call site in this project: non-smooth keyboard scroll
+     * and always called with a padTop value. Retries until the node exists or max attempts.
+     */
+    window.lazyTreeScrollEnsureTopVisible = (container, nodeId, padTop) => {
+        let attempts = 0;
+        const maxAttempts = 10;
+
+        const tryEnsure = () => {
+            const node = document.getElementById(nodeId);
+            if (!node) {
+                if (attempts++ < maxAttempts) {
+                    requestAnimationFrame(tryEnsure);
+                }
+                return;
+            }
+
+            const containerRect = container.getBoundingClientRect();
+            const nodeRect = node.getBoundingClientRect();
+
+            // Already fully visible with padding
+            if (nodeRect.top >= containerRect.top + padTop && nodeRect.bottom <= containerRect.bottom) {
+                return;
+            }
+
+            // Node above container top + padTop -> scroll up to align top + pad
+            if (nodeRect.top < containerRect.top + padTop) {
+                const offset = nodeRect.top - containerRect.top - padTop;
+                container.scrollTop += offset;
+                return;
+            }
+
+            // Node bottom below container bottom -> scroll down to bring bottom into view
+            if (nodeRect.bottom > containerRect.bottom) {
+                const offset = nodeRect.bottom - containerRect.bottom;
+                container.scrollTop += offset;
+                return;
+            }
+        };
+
+        tryEnsure();
+    };
+
     /**
      * Instantly scrolls the tree container to the top.
      */
@@ -104,7 +150,22 @@
             container.scrollTop = 0;
     };
 
+    /**
+     * Focus the tree container element.
+     * Called from .NET when selecting programmatically so keyboard navigation works.
+     */
+    window.lazyTreeFocus = (container) => {
+        try {
+            if (container && typeof container.focus === 'function') {
+                container.focus();
+            }
+        } catch (e) {
+            // swallow - focus is best-effort
+        }
+    };
+
 </script>
+
 
 
 @* 
@@ -116,7 +177,9 @@
 <div @ref="_containerRef"
      id="lazy-virt-tree-container"
      class="virt-tree-container"
-     style="height:@Height; overflow-y:auto; width:@Width">
+     style="height:@Height; overflow-y:auto; width:@Width"
+     tabindex="0"
+     @onkeydown="HandleKeyDown">
 
     @* 
         Virtualize renders only the visible subset of nodes for performance.

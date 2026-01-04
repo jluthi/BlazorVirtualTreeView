@@ -3,6 +3,7 @@
 
 @using BlazorVirtualTreeView
 @using Microsoft.AspNetCore.Components.Web
+@using Microsoft.AspNetCore.Components.Forms
 
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JSRuntime
@@ -42,7 +43,7 @@
 
 
 
-<div class="m-3 d-flex flex-column gap-2">
+<div class="m-3 d-flex flex-column gap-2" style="width: fit-content;">
 
     <!-- Navigation -->
     <div class="d-flex align-items-center gap-2">
@@ -74,9 +75,9 @@
         <span class="text-muted">Sync URL to Selection</span>
     </div>
 
-    <!-- Options -->
+    <!-- Actions: Collapse / Clear -->
     <div class="d-flex align-items-center gap-2">
-        <span class="text-muted fw-semibold me-2">Component Options</span>
+        <span class="text-muted fw-semibold me-2">Actions</span>
 
         <RadzenButton Text="Collapse All"
                       Icon="expand_less"
@@ -90,47 +91,73 @@
                       Click="ClearSelection"
                       Disabled="_treeView?.SelectedNode == null"
                       title="Clears the current selection highlight." />
+    </div>
+
+    <!-- Properties -->
+    <div class="d-flex align-items-center gap-2">
+        <span class="text-muted fw-semibold me-2">Component Properties</span>
 
         <RadzenCheckBox @bind-Value="_showRootNode"
                         TValue="bool"
-                        Style="margin-left:12px;" />
+                        Style="margin-left:12px;"
+                        title="Show or hide the implicit root node."
+                        aria-label="Show Root Node" />
 
         <span class="text-muted">Show Root Node</span>
 
         <RadzenCheckBox @bind-Value="_expandOnDoubleClick"
                         TValue="bool"
-                        Style="margin-left:12px;" />
+                        Style="margin-left:12px;"
+                        title="Enable to expand/collapse nodes by double-clicking them."
+                        aria-label="Expand on Double Click" />
 
         <span class="text-muted">Expand on Double Click</span>
 
-        <RadzenCheckBox @bind-Value="_smoothScroll"
+        <RadzenCheckBox @bind-Value="_disableSmoothScroll"
                         TValue="bool"
-                        Style="margin-left:12px;" />
+                        Style="margin-left:12px;"
+                        title="Disable animated smooth scrolling when navigating to or selecting a node. When checked, scrolling is instantaneous."
+                        aria-label="Disable Smooth Scrolling" />
 
-        <span class="text-muted">Smooth Scrolling</span>
-    </div>
-</div>
+        <span class="text-muted">Disable Smooth Scrolling</span>
 
+        <span class="text-muted" style="margin-left:12px;">Scroll Alignment</span>
 
-<div class="m-3 d-grid" style="grid-template-columns: 165px auto;">
-    <span class="text-muted">Lazy Load Delay</span>
-
-    <!-- Load delay -->
-    <div class="d-flex align-items-center gap-2">
-        <RadzenSlider @bind-Value="_loadDelayMs"
-                      Min="0"
-                      Max="10000"
-                      Step="100"
-                      Style="width:350px"
-                      title="Adjusts simulated latency when loading child nodes" />
-
-        <span class="text-muted small">@_loadDelayMs ms</span>
+        <InputSelect @bind-Value="_scrollAlignment"
+                     class="form-select"
+                     style="width:160px;margin-left:6px;"
+                     title="Determines where the target node will be placed in the viewport when scrolled into view."
+                     aria-label="Scroll Alignment">
+            @foreach (var s in Enum.GetValues(typeof(ScrollAlignments)).Cast<ScrollAlignments>())
+            {
+                <option value="@s">@s</option>
+            }
+        </InputSelect>
     </div>
 
-    <!-- Lazy load node count -->
-    <span class="text-muted">Loaded Nodes (count): </span>
+    <div class="d-grid" style="grid-template-columns: 165px auto; ">
+         <span class="text-muted">Lazy Load Delay</span>
 
-    <span class="text-muted">@TotalLoadedNodeCount</span>
+        <!-- Load delay -->
+        <div class="d-flex align-items-center gap-2">
+            <RadzenSlider @bind-Value="_loadDelayMs"
+                          Min="0"
+                          Max="10000"
+                          Step="100"
+                          Style="width:350px"
+                          title="Adjusts simulated latency when loading child nodes" />
+
+            <span class="text-muted small">@_loadDelayMs ms</span>
+        </div>
+
+        <!-- Lazy load node count -->
+        <span class="text-muted">Loaded Nodes (count): </span>
+
+        <span class="text-muted">@TotalLoadedNodeCount</span>
+    </div>
+
+    <hr/>
+
 </div>
 
 
@@ -146,8 +173,8 @@
                  LoadChildren="LoadChildrenAsync"
                  ShowRootNode="@_showRootNode"
                  Size="VirtualTreeViewSize.Medium"
-                 SmoothScrolling="@_smoothScroll"
-                 ScrollAlignment="ScrollAlignments.Center"
+                 DisableSmoothScrolling="@_disableSmoothScroll"
+                 ScrollAlignment="@_scrollAlignment"
                  ExpandNodeOnDoubleClick="@_expandOnDoubleClick"
                  SelectedNodeChanged="OnSelectedNodeChanged"
                  OnNodeContextMenu="OnNodeContextMenu">
@@ -228,7 +255,10 @@
     private bool _syncSelectionToUrl = false;
     private bool _showRootNode = false;
     private bool _expandOnDoubleClick = false;
-    private bool _smoothScroll = true;
+    private bool _disableSmoothScroll = false;
+
+    // Scroll alignment used by the VirtualTreeView
+    private ScrollAlignments _scrollAlignment = ScrollAlignments.Center;
 
     // Simulated load delay in milliseconds for lazy loading children
     private int _loadDelayMs = 200;
@@ -547,6 +577,5 @@
     }
 
     #endregion
-
   
 }

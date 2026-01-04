@@ -3,6 +3,13 @@
     font-size: inherit;
 }
 
+
+.virt-tree-container:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+
 .virt-tree-row {
     display: flex;
     align-items: center;
