@@ -698,24 +698,9 @@
             // Ignore localStorage errors in demo environments
         }
 
-        // Reset in-memory defaults
-        _showRootNode = false;
-        _expandOnDoubleClick = false;
-        _disableSmoothScroll = false;
-        _syncSelectionToUrl = false;
-        _scrollAlignment = ScrollAlignments.Center;
-        _loadDelayMs = 200;
 
-        StateHasChanged();
+        NavigationManager.NavigateTo(NavigationManager.BaseUri, forceLoad: true);
 
-        // Clear query string if any, and notify the user
-        NavigationManager.NavigateTo(NavigationManager.BaseUri, replace: true);
-
-        NotificationService.Notify(
-            NotificationSeverity.Info,
-            "Settings Reset",
-            "Controls and persisted settings were reset to defaults.",
-            3000);
     }
 
     #endregion
