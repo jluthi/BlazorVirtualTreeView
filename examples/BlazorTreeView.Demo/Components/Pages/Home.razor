@@ -49,17 +49,18 @@
     <div class="d-flex align-items-center gap-2">
         <span class="text-muted fw-semibold me-2">Navigation</span>
 
+        <RadzenButton Text="Go To Random Node"
+                      Icon="casino"
+                      ButtonStyle="ButtonStyle.Primary"
+                      Click="GoToDeepNode"
+                      title="Navigates to a random deeply nested node." />
+
         <RadzenButton Text="Go To Selected"
                       Icon="my_location"
+                      ButtonStyle="ButtonStyle.Light"
                       Click="GoToSelectedNode"
                       Disabled="_treeView?.SelectedNode == null"
                       title="Scrolls to the currently selected node." />
-
-        <RadzenButton Text="Go To Random Node"
-                      Icon="casino"
-                      ButtonStyle="ButtonStyle.Secondary"
-                      Click="GoToDeepNode"
-                      title="Navigates to a random deeply nested node." />
 
         <RadzenButton Text="Refresh Page"
                       Icon="refresh"
@@ -75,7 +76,7 @@
         <span class="text-muted">Sync URL to Selection</span>
     </div>
 
-    <!-- Actions: Collapse / Clear -->
+    <!-- Actions: Collapse / Clear / Reset -->
     <div class="d-flex align-items-center gap-2">
         <span class="text-muted fw-semibold me-2">Actions</span>
 
@@ -91,6 +92,12 @@
                       Click="ClearSelection"
                       Disabled="_treeView?.SelectedNode == null"
                       title="Clears the current selection highlight." />
+
+        <RadzenButton Text="Reset to Default"
+                      Icon="restart_alt"
+                      ButtonStyle="ButtonStyle.Secondary"
+                      Click="ResetToDefaultsAsync"
+                      title="Reset controls and persisted settings to their defaults." />
     </div>
 
     <!-- Properties -->
@@ -99,6 +106,7 @@
 
         <RadzenCheckBox @bind-Value="_showRootNode"
                         TValue="bool"
+                        Change="OnShowRootNodeChanged"
                         Style="margin-left:12px;"
                         title="Show or hide the implicit root node."
                         aria-label="Show Root Node" />
@@ -107,6 +115,7 @@
 
         <RadzenCheckBox @bind-Value="_expandOnDoubleClick"
                         TValue="bool"
+                        Change="OnExpandOnDoubleClickChanged"
                         Style="margin-left:12px;"
                         title="Enable to expand/collapse nodes by double-clicking them."
                         aria-label="Expand on Double Click" />
@@ -115,6 +124,7 @@
 
         <RadzenCheckBox @bind-Value="_disableSmoothScroll"
                         TValue="bool"
+                        Change="OnDisableSmoothScrollChanged"
                         Style="margin-left:12px;"
                         title="Disable animated smooth scrolling when navigating to or selecting a node. When checked, scrolling is instantaneous."
                         aria-label="Disable Smooth Scrolling" />
@@ -127,7 +137,8 @@
                      class="form-select"
                      style="width:160px;margin-left:6px;"
                      title="Determines where the target node will be placed in the viewport when scrolled into view."
-                     aria-label="Scroll Alignment">
+                     aria-label="Scroll Alignment"
+                     @onchange="OnScrollAlignmentChanged">
             @foreach (var s in Enum.GetValues(typeof(ScrollAlignments)).Cast<ScrollAlignments>())
             {
                 <option value="@s">@s</option>
@@ -281,7 +292,7 @@
     }
 
     /// <summary>
-    /// After first render, check the query string for a node path and select it.
+    /// After first render, load persisted UI settings and then check the query string for a node path and select it.
     /// This demonstrates syncing selection from the URL into the component.
     /// </summary>
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -290,6 +301,9 @@
             return;
 
         _handledInitialNavigation = true;
+
+        // Load persisted UI settings from localStorage (if present).
+        await LoadSettingsAsync();
 
         var uri = new Uri(NavigationManager.Uri);
         var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
@@ -323,7 +337,8 @@
         // file system lookup, etc.) would typically live here.
         // All code below exists purely to simulate latency and generate demo data.
 
-
+        // NOTE 2: There is no sort applied in the VirtualTreeView internally; if you need sorted nodes, 
+        // apply sorting in your LoadChildrenAsync implementation before returning.
 
         // Simulate asynchronous data retrieval to mimic real-world latency
         // (e.g., network or database access).
@@ -466,10 +481,14 @@
 
     /// <summary>
     /// Handle toggling URL sync. When disabled the query string is cleared.
+    /// Persist the setting to localStorage so it survives refresh.
     /// </summary>
-    private void OnUrlSyncToggled(bool value)
+    private async Task OnUrlSyncToggled(bool value)
     {
         _syncSelectionToUrl = value;
+
+        // Persist
+        await SaveSettingAsync("bvtv_syncSelectionToUrl", value.ToString());
 
         if (!value)
             NavigationManager.NavigateTo(NavigationManager.BaseUri, replace: true);
@@ -577,5 +596,127 @@
     }
 
     #endregion
-  
+
+    #region Persisted UI Settings (localStorage)
+
+    private async Task OnShowRootNodeChanged(bool value)
+    {
+        _showRootNode = value;
+        await SaveSettingAsync("bvtv_showRootNode", value.ToString());
+    }
+
+    private async Task OnExpandOnDoubleClickChanged(bool value)
+    {
+        _expandOnDoubleClick = value;
+        await SaveSettingAsync("bvtv_expandOnDoubleClick", value.ToString());
+    }
+
+    private async Task OnDisableSmoothScrollChanged(bool value)
+    {
+        _disableSmoothScroll = value;
+        await SaveSettingAsync("bvtv_disableSmoothScroll", value.ToString());
+    }
+
+    private async Task OnScrollAlignmentChanged(ChangeEventArgs e)
+    {
+        var raw = e?.Value?.ToString();
+        if (!string.IsNullOrWhiteSpace(raw) && Enum.TryParse<ScrollAlignments>(raw, out var parsed))
+        {
+            _scrollAlignment = parsed;
+            await SaveSettingAsync("bvtv_scrollAlignment", parsed.ToString());
+            StateHasChanged();
+        }
+    }
+
+    private async Task SaveSettingAsync(string key, string value)
+    {
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("localStorage.setItem", key, value);
+        }
+        catch
+        {
+            // Swallow exceptions on servers where localStorage is unavailable; this is a demo.
+        }
+    }
+
+    private async Task LoadSettingsAsync()
+    {
+        try
+        {
+            var v1 = await JSRuntime.InvokeAsync<string?>("localStorage.getItem", "bvtv_showRootNode");
+            if (bool.TryParse(v1, out var b1))
+                _showRootNode = b1;
+
+            var v2 = await JSRuntime.InvokeAsync<string?>("localStorage.getItem", "bvtv_expandOnDoubleClick");
+            if (bool.TryParse(v2, out var b2))
+                _expandOnDoubleClick = b2;
+
+            var v3 = await JSRuntime.InvokeAsync<string?>("localStorage.getItem", "bvtv_disableSmoothScroll");
+            if (bool.TryParse(v3, out var b3))
+                _disableSmoothScroll = b3;
+
+            var v4 = await JSRuntime.InvokeAsync<string?>("localStorage.getItem", "bvtv_syncSelectionToUrl");
+            if (bool.TryParse(v4, out var b4))
+                _syncSelectionToUrl = b4;
+
+            var sa = await JSRuntime.InvokeAsync<string?>("localStorage.getItem", "bvtv_scrollAlignment");
+            if (!string.IsNullOrWhiteSpace(sa) && Enum.TryParse<ScrollAlignments>(sa, out var parsed))
+                _scrollAlignment = parsed;
+
+            StateHasChanged();
+        }
+        catch
+        {
+            // localStorage may not be available in some contexts; ignore and continue.
+        }
+    }
+
+    /// <summary>
+    /// Removes persisted settings and resets in-memory values to their defaults.
+    /// Navigates to base URI (clears query string) and notifies the user.
+    /// </summary>
+    private async Task ResetToDefaultsAsync()
+    {
+        try
+        {
+            // Remove persisted keys
+            var keys = new[]
+            {
+                "bvtv_showRootNode",
+                "bvtv_expandOnDoubleClick",
+                "bvtv_disableSmoothScroll",
+                "bvtv_syncSelectionToUrl",
+                "bvtv_scrollAlignment"
+            };
+
+            foreach (var k in keys)
+                await JSRuntime.InvokeVoidAsync("localStorage.removeItem", k);
+        }
+        catch
+        {
+            // Ignore localStorage errors in demo environments
+        }
+
+        // Reset in-memory defaults
+        _showRootNode = false;
+        _expandOnDoubleClick = false;
+        _disableSmoothScroll = false;
+        _syncSelectionToUrl = false;
+        _scrollAlignment = ScrollAlignments.Center;
+        _loadDelayMs = 200;
+
+        StateHasChanged();
+
+        // Clear query string if any, and notify the user
+        NavigationManager.NavigateTo(NavigationManager.BaseUri, replace: true);
+
+        NotificationService.Notify(
+            NotificationSeverity.Info,
+            "Settings Reset",
+            "Controls and persisted settings were reset to defaults.",
+            3000);
+    }
+
+    #endregion
 }
