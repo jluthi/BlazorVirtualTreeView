@@ -129,7 +129,7 @@ namespace BlazorVirtualTreeView
         // =====================================================
 
         /// <summary>
-        /// Visual size variant for the tree. Affects row height, icon size, and indent.
+        /// Visual size variant for the tree view. Affects row height, icon size, indentation, etc. aka node density.
         /// Default: <see cref="VirtualTreeViewSize.Medium"/>.
         /// </summary>
         [Parameter]
