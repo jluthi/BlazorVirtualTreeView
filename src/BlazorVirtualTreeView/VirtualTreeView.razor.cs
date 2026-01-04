@@ -150,10 +150,11 @@ namespace BlazorVirtualTreeView
 
         /// <summary>
         /// Controls how the tree attempts to align a scrolled-to node in the viewport.
-        /// Default is <see cref="ScrollAlignments.Center"/>.
+        /// Default is <see cref="ScrollAlignments.Top"/>.
+        /// Note: Top alignment is recommended, as it tends to look smother to the user when node load latency is very low (quick).
         /// </summary>
         [Parameter]
-        public ScrollAlignments ScrollAlignment { get; set; } = ScrollAlignments.Top;
+        public ScrollAlignments AutoScrollAlignment { get; set; } = ScrollAlignments.Top;
 
         /// <summary>
         /// When true, programmatic scrolling uses smooth animated scrolling where supported.
@@ -284,7 +285,7 @@ namespace BlazorVirtualTreeView
             if (_keyboardNavigationRequested)
             {
                 // If consumer requested center alignment, always center during keyboard navigation.
-                if (ScrollAlignment == ScrollAlignments.Center)
+                if (AutoScrollAlignment == ScrollAlignments.Center)
                 {
                     // Use a direct scrollToNode with center alignment (non-smooth for keyboard ops).
                     await JS.InvokeVoidAsync(
@@ -308,7 +309,7 @@ namespace BlazorVirtualTreeView
             else
             {
                 bool smooth = !DisableSmoothScrolling;
-                string align = ScrollAlignment == ScrollAlignments.Center ? "center" : "start";
+                string align = AutoScrollAlignment == ScrollAlignments.Center ? "center" : "start";
 
                 await JS.InvokeVoidAsync(
                     "lazyTreeScrollToNode",
@@ -389,7 +390,18 @@ namespace BlazorVirtualTreeView
                 {
                     // If children are not yet materialized, expand current to trigger load.
                     if (current.Children == null)
+                    {
+                        // Allow the viewport to follow progress downwards by temporarily
+                        // lifting suppression and requesting a scroll to the current node.
+                        var prevSuppress = _suppressAutoScroll;
+                        _suppressAutoScroll = false;
+                        QueueScrollToNode(current);
+                        await InvokeAsync(StateHasChanged);
+                        await Task.Yield();
+                        _suppressAutoScroll = prevSuppress;
+
                         await ToggleAsync(current);
+                    }
 
                     // Give the renderer a chance to update visible structures so the next child can be found.
                     await InvokeAsync(StateHasChanged);
@@ -404,8 +416,19 @@ namespace BlazorVirtualTreeView
 
                     current = next;
 
+                    // Before potentially expanding further, allow the viewport to follow this newly selected node
+                    // so the user sees progress even if deeper loads are slow.
                     if (!current.IsExpanded)
+                    {
+                        var prevSuppress = _suppressAutoScroll;
+                        _suppressAutoScroll = false;
+                        QueueScrollToNode(current);
+                        await InvokeAsync(StateHasChanged);
+                        await Task.Yield();
+                        _suppressAutoScroll = prevSuppress;
+
                         await ToggleAsync(current);
+                    }
 
                     // After expanding, let the UI stabilize before continuing deeper.
                     await InvokeAsync(StateHasChanged);

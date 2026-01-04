@@ -65,7 +65,7 @@ to either `Pages/App.razor` for Blazor Server **or** `wwwroot/index.html` for Bl
 - Common properties to set:
   - `Size` - set the height of the tree view container.
   - `DisableSmoothScrolling` - disable smooth scrolling behavior (go instantly to target position).
-  - `ScrollAlignment` - control how selected nodes are aligned when programmatically scrolled into view.
+  - `AutoScrollAlignment` - control how selected nodes are aligned when programmatically scrolled into view.
 - Common events to listen for:
   - `SelectedNodeChanged` - notified when selection changes.
   - `OnNodeContextMenu` - invoked for right-click/context menu actions.

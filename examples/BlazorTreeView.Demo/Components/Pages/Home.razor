@@ -15,8 +15,7 @@
 @*
     Home page for the Virtual Tree View demo.
     Presents controls to interact with a virtualized, lazy-loaded tree component
-    and demonstrates features such as selection, navigation, context menus,
-    smooth scrolling, URL synchronization, and more...
+    and demonstrates features such as selection, navigation, context menus, URL synchronization, and more...
 *@
 
 <div style="width:50%">
@@ -131,7 +130,7 @@
 
         <span class="text-muted">Disable Smooth Scrolling</span>
 
-        <span class="text-muted" style="margin-left:12px;">Scroll Alignment</span>
+        <span class="text-muted" style="margin-left:12px;">Auto Scroll Alignment</span>
 
         <InputSelect @bind-Value="_scrollAlignment"
                      class="form-select"
@@ -152,6 +151,8 @@
         <!-- Load delay -->
         <div class="d-flex align-items-center gap-2">
             <RadzenSlider @bind-Value="_loadDelayMs"
+                          TValue="int"
+                          Change="OnLoadDelayMsChanged"
                           Min="0"
                           Max="10000"
                           Step="100"
@@ -185,7 +186,7 @@
                  ShowRootNode="@_showRootNode"
                  Size="VirtualTreeViewSize.Medium"
                  DisableSmoothScrolling="@_disableSmoothScroll"
-                 ScrollAlignment="@_scrollAlignment"
+                 AutoScrollAlignment="@_scrollAlignment"
                  ExpandNodeOnDoubleClick="@_expandOnDoubleClick"
                  SelectedNodeChanged="OnSelectedNodeChanged"
                  OnNodeContextMenu="OnNodeContextMenu">
@@ -269,7 +270,7 @@
     private bool _disableSmoothScroll = false;
 
     // Scroll alignment used by the VirtualTreeView
-    private ScrollAlignments _scrollAlignment = ScrollAlignments.Center;
+    private ScrollAlignments _scrollAlignment = ScrollAlignments.Top;
 
     // Simulated load delay in milliseconds for lazy loading children
     private int _loadDelayMs = 200;
@@ -628,6 +629,13 @@
         }
     }
 
+    // Persist the load delay slider when it changes so it's restored on refresh.
+    private async Task OnLoadDelayMsChanged(int value)
+    {
+        _loadDelayMs = value;
+        await SaveSettingAsync("bvtv_loadDelayMs", value.ToString());
+    }
+
     private async Task SaveSettingAsync(string key, string value)
     {
         try
@@ -664,6 +672,11 @@
             if (!string.IsNullOrWhiteSpace(sa) && Enum.TryParse<ScrollAlignments>(sa, out var parsed))
                 _scrollAlignment = parsed;
 
+            // Restore persisted load delay (ms) for the latency slider
+            var ld = await JSRuntime.InvokeAsync<string?>("localStorage.getItem", "bvtv_loadDelayMs");
+            if (int.TryParse(ld, out var parsedMs))
+                _loadDelayMs = parsedMs;
+
             StateHasChanged();
         }
         catch
@@ -687,7 +700,8 @@
                 "bvtv_expandOnDoubleClick",
                 "bvtv_disableSmoothScroll",
                 "bvtv_syncSelectionToUrl",
-                "bvtv_scrollAlignment"
+                "bvtv_scrollAlignment",
+                "bvtv_loadDelayMs"
             };
 
             foreach (var k in keys)

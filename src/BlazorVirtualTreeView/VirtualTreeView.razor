@@ -59,37 +59,94 @@
      *
      * This is the second phase of programmatic scrolling and is responsible
      * for precise positioning and visual centering.
+     *
+     * NOTE: Replaces the naive scrollIntoView behavior with an explicit
+     * container.scrollTo-based centering step for more deterministic
+     * alignment. After scrolling we verify and make small adjustments
+     * on subsequent animation frames so intermittent race conditions
+     * with virtualization / rendering are tolerated.
      */
     window.lazyTreeScrollToNode = (container, nodeId, smooth, align) => {
-        console.log(smooth);
         let attempts = 0;
-        const maxAttempts = 20;
+        const maxAttempts = 60; // allow extra frames for slow renders
 
-        /**
-         * Attempts to locate the node in the DOM and scroll it into view.
-         * If the node is not yet rendered, retry on the next animation frame.
-         */
+        const computeAndScrollCenter = (node) => {
+            const containerRect = container.getBoundingClientRect();
+            const nodeRect = node.getBoundingClientRect();
+
+            // Distance from container top to node top in document coordinates.
+            const nodeTopInContainer = nodeRect.top - containerRect.top;
+
+            // Desired scrollTop so the node's center aligns with container center.
+            const targetScrollTop = Math.max(0,
+                container.scrollTop + nodeTopInContainer - (containerRect.height / 2) + (nodeRect.height / 2));
+
+            if (typeof container.scrollTo === "function") {
+                try {
+                    container.scrollTo({ top: targetScrollTop, behavior: smooth ? "smooth" : "auto" });
+                } catch (e) {
+                    // Some environments may throw for options — fallback to direct assignment.
+                    container.scrollTop = targetScrollTop;
+                }
+            } else {
+                container.scrollTop = targetScrollTop;
+            }
+        };
+
+        const isCenteredEnough = (node) => {
+            const containerRect = container.getBoundingClientRect();
+            const nodeRect = node.getBoundingClientRect();
+
+            const nodeCenter = nodeRect.top + nodeRect.height / 2;
+            const containerCenter = containerRect.top + containerRect.height / 2;
+
+            // Allow a small tolerance (few pixels) to account for subpixel/layout differences.
+            return Math.abs(nodeCenter - containerCenter) <= 2;
+        };
+
         const tryScroll = () => {
             const node = document.getElementById(nodeId);
 
-            if (node) {
-                /**
-                 * Scroll the node into view once it exists.
-                 * "center" provides a stable visual anchor and avoids edge clipping.
-                 */
+            if (!node) {
+                if (attempts++ < maxAttempts) {
+                    requestAnimationFrame(tryScroll);
+                }
+                return;
+            }
+
+            // If consumer requested center alignment, perform a precise container-based center scroll
+            if (align === "center") {
+                computeAndScrollCenter(node);
+
+                // Verify and adjust on subsequent frames if necessary.
+                const verify = () => {
+                    // If we are already centered, we're done.
+                    if (isCenteredEnough(node))
+                        return;
+
+                    if (attempts++ < maxAttempts) {
+                        // Recompute relative positions and nudge the scroll (non-smooth to avoid long animations).
+                        computeAndScrollCenter(node);
+                        requestAnimationFrame(verify);
+                    }
+                };
+
+                // Start verification on next frame so DOM has a chance to settle.
+                requestAnimationFrame(verify);
+                return;
+            }
+
+            // For non-center alignment, fall back to scrollIntoView which honors 'start'/'nearest'.
+            try {
                 node.scrollIntoView({
                     behavior: smooth ? "smooth" : "auto",
                     block: align,
                 });
-                return;
-            }
-
-            /**
-             * Retry while the virtualizer is still rendering.
-             * This prevents hard failures when navigating deep trees.
-             */
-            if (attempts++ < maxAttempts) {
-                requestAnimationFrame(tryScroll);
+            } catch (e) {
+                // Older browsers may not support the options object; fallback to default scrollIntoView.
+                try {
+                    node.scrollIntoView();
+                } catch (ignored) { }
             }
         };
 
