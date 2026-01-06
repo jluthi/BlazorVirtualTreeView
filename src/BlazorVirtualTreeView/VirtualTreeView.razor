@@ -51,21 +51,21 @@
 
 
      /**
-     * Scrolls the tree to a specific node by DOM id.
-     *
-     * This function assumes the node may not yet exist in the DOM due to
-     * virtualization. It retries using requestAnimationFrame until the
-     * element appears or a maximum retry count is reached.
-     *
-     * This is the second phase of programmatic scrolling and is responsible
-     * for precise positioning and visual centering.
-     *
-     * NOTE: Replaces the naive scrollIntoView behavior with an explicit
-     * container.scrollTo-based centering step for more deterministic
-     * alignment. After scrolling we verify and make small adjustments
-     * on subsequent animation frames so intermittent race conditions
-     * with virtualization / rendering are tolerated.
-     */
+      * Scrolls the tree to a specific node by DOM id.
+      *
+      * This function assumes the node may not yet exist in the DOM due to
+      * virtualization. It retries using requestAnimationFrame until the
+      * element appears or a maximum retry count is reached.
+      *
+      * This is the second phase of programmatic scrolling and is responsible
+      * for precise positioning and visual centering.
+      *
+      * NOTE: Replaces the naive scrollIntoView behavior with an explicit
+      * container.scrollTo-based centering step for more deterministic
+      * alignment. After scrolling we verify and make small adjustments
+      * on subsequent animation frames so intermittent race conditions
+      * with virtualization / rendering are tolerated.
+      */
     window.lazyTreeScrollToNode = (container, nodeId, smooth, align) => {
         let attempts = 0;
         const maxAttempts = 60; // allow extra frames for slow renders
@@ -258,66 +258,70 @@
                 - Right-click raises a context menu event
             *@
             <div id="@node.DomId"
-                 class="virt-tree-row @(node == SelectedNode ? "selected" : "")"
-                 @onclick="@(() => OnRowClicked(node))"
-                 @ondblclick="@(() => OnRowDoubleClicked(node))"
+                 class="virt-tree-row"
                  @oncontextmenu="@((MouseEventArgs e) => OnContextMenuAsync(e, node))"
                  @oncontextmenu:preventDefault="true"
                  @oncontextmenu:stopPropagation="true">
 
-                @* 
-                    Content wrapper.
-                    Left margin is based on node depth to visually indicate hierarchy.
-                *@
-                <div class="virt-tree-content"
-                     style="margin-left:@(Math.Max(0, (ShowRootNode ? node.Level + 1 : node.Level)) * IndentSizePx)px">
+                @* Keep the indentation applied to the icon + content so alignment is preserved. *@
+                <div style="display: flex; width: 100%;">
+                    
+                    @* Spacer for indentation *@
+                    <div style="flex-shrink: 0; width: @(Math.Max(0, (ShowRootNode ? node.Level + 1 : node.Level)) * IndentSizePx)px;"></div>
 
-                    @* Expand / collapse toggle *@
-                    @if (!node.IsLeafNode)
-                    {
+                    <div class="virt-tree-main" style="height: 100%; flex: 1; min-width: 0; align-items: center;">
 
-                        <span class="virt-tree-icon"
-                              style="width:@($"{IconSizePx}px")"
-                              @onclick:stopPropagation="true"
-                              @onclick="@(() => ToggleAsync(node))">
-
-                            <span class="material-symbols-outlined @(node.IsLoading ? "virt-tree-spinner" : "")"
-                                  style="font-size:@($"{IconSizePx}px")">
+                        @* Expand / collapse toggle*@
+                        @if (!node.IsLeafNode)
+                        {
+                            <div class="virt-tree-icon material-symbols-outlined @(node.IsLoading ? "virt-tree-spinner" : "")"
+                                 style="width:@($"{IconSizePx}px"); height:@($"{IconSizePx}px"); font-size:@($"{IconSizePx}px"); font-weight: 400;"
+                                 @onclick:stopPropagation="true"
+                                 @onclick="@(() => ToggleAsync(node))">
                                 @ResolveExpandIcon(node)
-                            </span>
-                        </span>
-                    }
-                    else
-                    {
-                        @* Placeholder keeps text alignment consistent for leaf nodes *@
-                        <span class="virt-tree-icon-placeholder"
-                              style="width:@($"{IconSizePx}px")">
-                        </span>
-                    }
+                            </div>
+                        }
+                        else
+                        {
+                            @* Placeholder keeps text alignment consistent for leaf nodes *@
+                            <div class="virt-tree-icon-placeholder"
+                                 style="width:@($"{IconSizePx}px"); height:@($"{IconSizePx}px");">
+                            </div>
+                        }
 
+                        @* 
+                            Node content.
+                        *@
+                        <div class="virt-tree-content @(node == SelectedNode ? "selected" : "")" 
+                             @onclick="@(() => OnRowClicked(node))"
+                             @ondblclick="@(() => OnRowDoubleClicked(node))">
 
-                    @if (NodeTemplate != null)
-                    {
-                        @NodeTemplate(node)
-                    }
-                    else
-                    {
-                        <!-- DEFAULT RENDERING -->
-                        @* Main node icon (consumer-defined) *@
-                        <span class="virt-tree-node-icon material-symbols-outlined"
-                              style="font-size:@($"{IconSizePx}px")">
-                            @ResolveNodeIcon(node)
-                        </span>
+                            @if (NodeTemplate != null)
+                            {
+                                @NodeTemplate(node)
+                            }
+                            else
+                            {
+                                <!-- DEFAULT RENDERING -->
 
-                        @* Display text for the node *@
-                        <span class="virt-tree-text"
-                              style="font-size:@($"{IconSizePx - 2}px")">
-                            @node.Text
-                        </span>
+                                @* Main node icon (consumer-defined) *@
+                                <div class="virt-tree-node-icon material-symbols-outlined"
+                                        style="font-size:@($"{IconSizePx}px"); font-weight: 400; margin-right: 8px;">
+                                    @ResolveNodeIcon(node)
+                                </div>
 
-                    }
+                                @* Display text for the node (no flex) *@
+                                <div class="virt-tree-text"
+                                        style="font-size:@($"{IconSizePx}px"); font-weight: 400;">
+                                    @node.Text
+                                </div>
 
+                            }
 
+                    
+
+                        </div>
+                    </div>
 
                 </div>
             </div>

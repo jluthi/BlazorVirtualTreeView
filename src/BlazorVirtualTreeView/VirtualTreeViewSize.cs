@@ -4,8 +4,10 @@
 /// </summary>
 public enum VirtualTreeViewSize
 {
+    ExtraSmall,
     Small,
     Medium,
-    Large
+    Large,
+    ExtraLarge
 }
 

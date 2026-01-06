@@ -121,7 +121,7 @@ namespace BlazorVirtualTreeView
         /// Default: "Description".
         /// </summary>
         [Parameter]
-        public string LeafNodeIcon { get; set; } = "Description";
+        public string LeafNodeIcon { get; set; } = "unknown_document";
 
 
         // =====================================================
@@ -203,28 +203,35 @@ namespace BlazorVirtualTreeView
         private bool _lastShowRootNode;
 
         // Layout helpers
+        // Layout helpers
         private int RowHeight => Size switch
         {
+            VirtualTreeViewSize.ExtraSmall => 20,
             VirtualTreeViewSize.Small => 24,
             VirtualTreeViewSize.Medium => 28,
-            VirtualTreeViewSize.Large => 34,
+            VirtualTreeViewSize.Large => 32,
+            VirtualTreeViewSize.ExtraLarge => 36,
             _ => 28
         };
 
         private int IconSizePx => Size switch
         {
-            VirtualTreeViewSize.Small => 18,
+            VirtualTreeViewSize.ExtraSmall => 14,
+            VirtualTreeViewSize.Small => 16,
             VirtualTreeViewSize.Medium => 20,
             VirtualTreeViewSize.Large => 24,
+            VirtualTreeViewSize.ExtraLarge => 28,
             _ => 20
         };
 
         private int IndentSizePx => Size switch
         {
-            VirtualTreeViewSize.Small => 14,
-            VirtualTreeViewSize.Medium => 18,
-            VirtualTreeViewSize.Large => 22,
-            _ => 18
+            VirtualTreeViewSize.ExtraSmall => 14,
+            VirtualTreeViewSize.Small => 16,
+            VirtualTreeViewSize.Medium => 20,
+            VirtualTreeViewSize.Large => 24,
+            VirtualTreeViewSize.ExtraLarge => 28,
+            _ => 20
         };
 
 

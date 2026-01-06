@@ -1,61 +1,102 @@
-﻿.virt-tree-container {
-    font-family: inherit;
-    font-size: inherit;
+﻿/* Disable selection everywhere by default */
+.virt-tree-container,
+.virt-tree-row,
+.virt-tree-content,
+.virt-tree-icon,
+.virt-tree-icon-placeholder,
+.virt-tree-node-icon {
+    -webkit-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+    user-select: none !important;
+    -webkit-touch-callout: none !important;
 }
 
+/* Container */
+.virt-tree-container {
+    font-family: inherit;
+    font-size: inherit;
+    padding: 4px;
+}
 
 .virt-tree-container:focus {
     outline: none;
     box-shadow: none;
 }
 
-
+/* Row */
 .virt-tree-row {
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-    padding: 2px 4px; /* breathing room */
-    margin: 0px;
-    border-radius: 4px;
+    width: 100%;
+    cursor: default;
 }
 
-    .virt-tree-row:hover {
-        background-color: rgba(0, 0, 0, 0.04);
-    }
+/* Main (expand icon + content wrapper) */
+.virt-tree-main {
+    display: flex;
+    vertical-align: middle;
+    min-width: 0; /* allow text truncation */
+}
 
-    .virt-tree-row.selected {
-        background-color: rgba(25, 118, 210, 0.20); /* Override colors here */
-    }
-
+/* Content (full-width highlight area) */
 .virt-tree-content {
     display: flex;
     align-items: center;
-    gap: 6px; /* spacing between icon and text */
+    width: 100%;
+    box-sizing: border-box;
+    padding: 2px 4px;
 }
 
+.virt-tree-content:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+    border-radius: 6px;
+}
+
+.virt-tree-content.selected {
+    background-color: rgba(25, 118, 210, 0.20);
+    border-radius: 6px;
+}
+
+/* Icons / placeholders */
 .virt-tree-icon,
-.virt-tree-icon-placeholder {
+.virt-tree-icon-placeholder,
+.virt-tree-node-icon {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
 }
 
-/* Material icon alignment fixes */
-.material-symbols-outlined {
-    font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
-    vertical-align: middle;
+/* Spacing between expand icon/placeholder and content */
+.virt-tree-icon + .virt-tree-content,
+.virt-tree-icon-placeholder + .virt-tree-content {
+    margin-left: 6px;
 }
 
-/* Text styling similar to MudTreeView */
+.virt-tree-icon:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+    border-radius: 50%;
+}
+
+/* Text */
 .virt-tree-text {
-    line-height: 1.35;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+
+    flex: 0 1 auto;
+    min-width: 0;
+
+    cursor: pointer;
+
+    /* Allow selection only for text */
+    -webkit-user-select: text !important;
+    -moz-user-select: text !important;
+    -ms-user-select: text !important;
+    user-select: text !important;
 }
 
 
+/* Spinner */
 @keyframes spin {
     from {
         transform: rotate(0deg);
@@ -65,7 +106,6 @@
         transform: rotate(360deg);
     }
 }
-
 
 .virt-tree-spinner {
     animation: spin 1s linear infinite;

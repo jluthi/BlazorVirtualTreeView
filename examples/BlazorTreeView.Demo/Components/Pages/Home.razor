@@ -208,9 +208,9 @@
        - `Children == null` typically means children are not yet loaded; an empty list means no children.
        - Templates are created/destroyed frequently due to virtualization — keep markup simple and avoid heavy work.
     *@
-    @*     
-    <NodeTemplate Context="node">
-        <div style="display:flex;align-items:center;gap:8px;width:100%;">
+        
+ @*    <NodeTemplate Context="node">
+        <div style="display:flex;align-items:center;gap:8px;">
             <!-- Icon -->
             <span class="material-symbols-outlined" style="font-size:20px;flex:0 0 auto;">
                 @(node.IsLeafNode ? "description" : (node.IsExpanded ? "folder_open" : "folder"))
@@ -228,8 +228,8 @@
                     </span>
             </div>
         </div>
-    </NodeTemplate>  
-    *@
+    </NodeTemplate>   *@
+   
 
 </VirtualTreeView>
 

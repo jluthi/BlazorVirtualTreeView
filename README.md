@@ -61,7 +61,7 @@ to either `Pages/App.razor` for Blazor Server **or** `wwwroot/index.html` for Bl
   - `RemoveNode(..)` - remove a node.
   - `RefreshSelectedAsync()` - reload children of the currently selected node.
   - `ClearSelection()` - clear the current selection.
-  - `CollapseAll()` - collapse all root nodes and any loaded descendants.
+  - `CollapseAll(..)` - collapse all root nodes and any loaded descendants.
 - Common properties to set:
   - `Size` - Affects tree view content dentisty via node height, icon size, indentation, etc...
   - `DisableSmoothScrolling` - disable smooth scrolling behavior (go instantly to target position).
