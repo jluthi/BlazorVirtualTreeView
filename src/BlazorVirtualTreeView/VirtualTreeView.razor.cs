@@ -24,8 +24,6 @@ namespace BlazorVirtualTreeView
         [Parameter]
         public RenderFragment<VirtualTreeViewNode<T>>? NodeTemplate { get; set; }
 
-
-
         // =====================================================
         // Data & required inputs
         // =====================================================
@@ -47,7 +45,6 @@ namespace BlazorVirtualTreeView
         public Func<VirtualTreeViewNode<T>, Task<IReadOnlyList<VirtualTreeViewNode<T>>>> LoadChildren { get; set; }
             = default!;
 
-
         // =====================================================
         // Events & interaction callbacks
         // =====================================================
@@ -64,7 +61,6 @@ namespace BlazorVirtualTreeView
         /// </summary>
         [Parameter]
         public EventCallback<(MouseEventArgs MouseArgs, VirtualTreeViewNode<T> Node)> OnNodeContextMenu { get; set; }
-
 
         // =====================================================
         // Tree structure & behavior
@@ -96,7 +92,6 @@ namespace BlazorVirtualTreeView
         /// </summary>
         [Parameter]
         public bool ExpandNodeOnDoubleClick { get; set; } = false;
-
 
         // =====================================================
         // Layout, sizing & scrolling
@@ -135,8 +130,6 @@ namespace BlazorVirtualTreeView
         /// </summary>
         [Parameter]
         public bool DisableSmoothScrolling { get; set; } = false;
-
-
 
         #endregion
 
@@ -469,7 +462,6 @@ namespace BlazorVirtualTreeView
             }
         }
 
-
         /// <summary>
         /// Adds a new node under the specified parent node.
         /// If <paramref name="parentNode"/> is null, the node is added to the root.
@@ -497,7 +489,7 @@ namespace BlazorVirtualTreeView
 
             if (selectNewNode)
             {
-                SelectedNode = newNode;
+                SetSelectedNodeInternal(newNode);
                 QueueScrollToNode(newNode);
             }
 
@@ -534,7 +526,7 @@ namespace BlazorVirtualTreeView
 
             // Clear selection if we removed it
             if (ReferenceEquals(SelectedNode, node))
-                SelectedNode = null;
+                SetSelectedNodeInternal(null);
 
             RebuildVisibleNodes();
             StateHasChanged();
@@ -581,7 +573,7 @@ namespace BlazorVirtualTreeView
         /// </summary>
         public void ClearSelection()
         {
-            SelectedNode = null;
+            SetSelectedNodeInternal(null);
             StateHasChanged();
         }
 
@@ -611,9 +603,7 @@ namespace BlazorVirtualTreeView
 
             _pendingScrollToTop = true;
             StateHasChanged();
-
         }
-
 
         #endregion
 
@@ -670,7 +660,7 @@ namespace BlazorVirtualTreeView
         /// </summary>
         private async Task OnSelect(VirtualTreeViewNode<T> node)
         {
-            SelectedNode = node;
+            SetSelectedNodeInternal(node);
 
             if (SelectedNodeChanged.HasDelegate)
                 await SelectedNodeChanged.InvokeAsync(node);
@@ -743,6 +733,20 @@ namespace BlazorVirtualTreeView
 
 
         #region internal helpers 
+
+        private void SetSelectedNodeInternal(VirtualTreeViewNode<T>? node)
+        {
+            if (ReferenceEquals(SelectedNode, node))
+                return;
+
+            if (SelectedNode != null)
+                SelectedNode.IsSelected = false;
+
+            SelectedNode = node;
+
+            if (SelectedNode != null)
+                SelectedNode.IsSelected = true;
+        }
 
         private void AttachNodeInternal(VirtualTreeViewNode<T> node, VirtualTreeViewNode<T> parent)
         {

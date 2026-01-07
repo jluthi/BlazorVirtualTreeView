@@ -201,6 +201,7 @@
            - `VirtualTreeViewNode<T>? Parent { get; internal set; }` — parent reference
            - `int Level { get; internal set; }`     — depth level in the tree (root = 0)
            - `bool IsLeafNode { get; set; }`        — whether this node can have children or not. Leaf nodes do not.
+           - `bool IsSelected { get; internal set; }` — whether the node is currently selected
            - `bool IsExpanded { get; internal set; }` — whether the node is currently expanded
            - `List<VirtualTreeViewNode<T>>? Children { get; internal set; }` — lazily-loaded children (null = not loaded yet)
            - `string CollapsedIcon { get; set; }`   — icon used when collapsed

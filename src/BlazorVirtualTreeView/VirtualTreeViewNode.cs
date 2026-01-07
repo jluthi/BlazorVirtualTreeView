@@ -12,7 +12,7 @@
     /// (e.g. "cases/2025/12345/documents").
     /// </summary>
     public string Path { get; init; } = string.Empty;
-     
+
     #endregion
 
 
@@ -81,6 +81,11 @@
     /// Whether this node is currently expanded.
     /// </summary>
     public bool IsExpanded { get; internal set; }
+
+    /// <summary>
+    /// True when this node is the tree's current selection.
+    /// </summary>
+    public bool IsSelected { get; internal set; }
 
     /// <summary>
     /// Indicates async child loading is in progress.
