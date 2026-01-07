@@ -212,26 +212,25 @@
        - Templates are created/destroyed frequently due to virtualization — keep markup simple and avoid heavy work.
     *@
         
- @*    <NodeTemplate Context="node">
+@*Uncomment below to see custom node template example*@
+@*     <NodeTemplate Context="node">
         <div style="display:flex;align-items:center;gap:8px;">
             <!-- Icon -->
-            <span class="material-symbols-outlined" style="font-size:20px;flex:0 0 auto;">
+            <div class="material-symbols-outlined" style="font-size:20px;">
                 @(node.IsLeafNode ? node.LeafIcon : (node.IsExpanded ? node.ExpandedIcon : node.CollapsedIcon))
-            </span>
+            </div>
 
-            <!-- Text (ellipsis-safe) -->
-            <div style="flex:1 1 auto;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">
+            <!-- Text -->
+            <div>
                 @node.Text
             </div>
 
-            <!-- Right-aligned badge: shows child count or loading spinner -->
-            <div style="flex:0 0 auto;margin-left:8px;display:inline-flex;align-items:center;">
-                    <span style="background:#f1f3f5;border-radius:999px;padding:2px 8px;font-size:0.75rem;color:#495057;border:1px solid rgba(0,0,0,0.06);">
-                        @(node.Children == null ? "-" : node.Children.Count.ToString())
-                    </span>
-            </div>
+            <!--Custom Display Counter-->
+            <span>
+                (@(node.Children == null ? "?" : node.Children.Count.ToString()))
+            </span>
         </div>
-    </NodeTemplate>   *@
+    </NodeTemplate>  *@ 
    
 
 </VirtualTreeView>

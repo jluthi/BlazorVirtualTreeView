@@ -115,23 +115,31 @@ Each icon is defined by a Material icon name (string), and you can override icon
 
 These properties are used by the component's internal icon resolver to choose which icon string to render for each row.
 <br/>
-*Note: These properties are of course ignored if you provide a custom `NodeTemplate` render fragment.*
 
-**Override Icons Example (per node)**
+**Optional Node Template (Render Fragment Example)**
 
 ```razor
-<VirtualTreeView>
+<VirtualTreeView ..>
+    <!-- Custom Node Template -->
     <NodeTemplate Context="node">
-        <div style="display:flex;align-items:center;gap:8px;width:100%;">
-            <span class="material-symbols-outlined" style="font-size:20px;flex:0 0 auto;">
-                @(node.IsLeafNode ? "description" : (node.IsExpanded ? "folder_open" : "folder"))
-            </span>
-            <div style="flex:1 1 auto;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">
+        <div style="display:flex;align-items:center;gap:8px;">
+            <!-- Icon -->
+            <div class="material-symbols-outlined" style="font-size:20px;">
+                @(node.IsLeafNode ? node.LeafIcon : (node.IsExpanded ? node.ExpandedIcon : node.CollapsedIcon))
+            </div>
+
+            <!-- Text -->
+            <div>
                 @node.Text
             </div>
+
+            <!--Custom Display Counter-->
+            <span>
+                (@(node.Children == null ? "?" : node.Children.Count.ToString()))
+            </span>
         </div>
-    </NodeTemplate>
-</VirtualTreeView>
+    </NodeTemplate>  
+ </VirtualTreeView>
 ```
 
 <br/>
