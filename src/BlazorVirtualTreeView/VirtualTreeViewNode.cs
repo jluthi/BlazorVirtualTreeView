@@ -12,7 +12,7 @@
     /// (e.g. "cases/2025/12345/documents").
     /// </summary>
     public string Path { get; init; } = string.Empty;
-
+     
     #endregion
 
 
@@ -27,6 +27,29 @@
     /// Display text shown in the tree.
     /// </summary>
     public string Text { get; set; } = string.Empty;
+
+    #endregion
+
+
+    #region Icons
+
+    /// <summary>
+    /// Icon used when this node can have children (IsLeafNode is false) and is collapsed.
+    /// Default: "folder".
+    /// </summary>
+    public string CollapsedIcon { get; set; } = "folder";
+
+    /// <summary>
+    /// Icon used when this node can have children (IsLeafNode is false) and is expanded.
+    /// Default: "folder_open".
+    /// </summary>
+    public string ExpandedIcon { get; set; } = "folder_open";
+
+    /// <summary>
+    /// Icon used when this node cannot have children (IsLeafNode is true).
+    /// Default: "unknown_document".
+    /// </summary>
+    public string LeafIcon { get; set; } = "unknown_document";
 
     #endregion
 

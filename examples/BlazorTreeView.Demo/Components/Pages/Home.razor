@@ -203,6 +203,9 @@
            - `bool IsLeafNode { get; set; }`        — whether this node can have children or not. Leaf nodes do not.
            - `bool IsExpanded { get; internal set; }` — whether the node is currently expanded
            - `List<VirtualTreeViewNode<T>>? Children { get; internal set; }` — lazily-loaded children (null = not loaded yet)
+           - `string CollapsedIcon { get; set; }`   — icon used when collapsed
+           - `string ExpandedIcon { get; set; }`    — icon used when expanded
+           - `string LeafIcon { get; set; }`        — icon used for leaf nodes
 
        Notes:
        - `Children == null` typically means children are not yet loaded; an empty list means no children.
@@ -213,7 +216,7 @@
         <div style="display:flex;align-items:center;gap:8px;">
             <!-- Icon -->
             <span class="material-symbols-outlined" style="font-size:20px;flex:0 0 auto;">
-                @(node.IsLeafNode ? "description" : (node.IsExpanded ? "folder_open" : "folder"))
+                @(node.IsLeafNode ? node.LeafIcon : (node.IsExpanded ? node.ExpandedIcon : node.CollapsedIcon))
             </span>
 
             <!-- Text (ellipsis-safe) -->
@@ -338,7 +341,7 @@
         // file system lookup, etc.) would typically live here.
         // All code below exists purely to simulate latency and generate demo data.
 
-        // NOTE 2: There is no sort applied in the VirtualTreeView internally; if you need sorted nodes, 
+        // NOTE 2: There is no sort applied in the VirtualTreeView internally; if you need sorted nodes,
         // apply sorting in your LoadChildrenAsync implementation before returning.
 
         // Simulate asynchronous data retrieval to mimic real-world latency
@@ -403,13 +406,30 @@
             ? $"D{depth}_N{index}"
             : $"D{depth}_N{index}.example";
 
-        return new VirtualTreeViewNode<string>
+        var node = new VirtualTreeViewNode<string>
         {
             Value = name,
             Text = name,
             Path = string.IsNullOrEmpty(parentPath) ? name : $"{parentPath}/{name}",
             IsLeafNode = !canHaveChildren
         };
+
+        // Optional if you want to set custom icons per node.
+        if (canHaveChildren)
+        {
+            // Use default icons
+            node.CollapsedIcon = node.CollapsedIcon;
+            node.ExpandedIcon = node.ExpandedIcon;
+        }
+        else
+        {
+            // Use default icon
+            // Note: You can have the leaf icon be a different icon based on file type, etc., if desired.
+            node.LeafIcon = node.LeafIcon;
+      
+        }
+
+        return node;
     }
 
     #endregion
@@ -565,14 +585,31 @@
 
         bool canHaveChildren = _rand.Next(0, 10) < 6;
         var name = $"New_{DateTime.Now:HHmmss}" + (canHaveChildren ? "" : ".example");
-        
-        _treeView.AddNode(new VirtualTreeViewNode<string>
+
+        var node = new VirtualTreeViewNode<string>
         {
             Value = name,
             Text = name,
             Path = $"{parent.Path}/{name}",
             IsLeafNode = !canHaveChildren
-        }, _treeView.SelectedNode);
+        };
+
+        // Optional if you want to set custom icons per node.
+        if (canHaveChildren)
+        {
+            // Use default icons
+            node.CollapsedIcon = node.CollapsedIcon;
+            node.ExpandedIcon = node.ExpandedIcon;
+        }
+        else
+        {
+            // Use default icon
+            // Note: You can have the leaf icon be a different icon based on file type, etc., if desired.
+            node.LeafIcon = node.LeafIcon;
+
+        }
+
+        _treeView.AddNode(node, _treeView.SelectedNode);
 
         // Keep demo counter in sync with manual additions.
         System.Threading.Interlocked.Increment(ref TotalLoadedNodeCount);

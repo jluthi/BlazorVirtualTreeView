@@ -96,47 +96,31 @@ This flexibility means you can present hierarchical data that is not a literal f
 
 `VirtualTreeViewNode<T>.IsLeafNode` controls both whether a node is considered expandable and which built-in icons the component displays:
 
-- `IsLeafNode == true` - the node is a leaf: it cannot be expanded, the expand/collapse affordance is hidden, and `LeafNodeIcon` is used for the main node icon.
-- `IsLeafNode == false` - the node may have children: the expand affordance is shown (when appropriate) and the component selects `CollapsedNodeIcon` or `ExpandedNodeIcon` depending on loaded/expanded state.
+- `IsLeafNode == true` - the node is a leaf: it cannot be expanded, the expand/collapse affordance is hidden, and `LeafIcon` is used for the main node icon.
+- `IsLeafNode == false` - the node may have children: the expand affordance is shown (when appropriate) and the component selects `CollapsedIcon` or `ExpandedIcon` depending on loaded/expanded state.
 
 
 ### 👕 Node Customization
 
 The tree uses **Google Material Design icons** for all built-in node rendering.  
-Each icon is defined by a Material icon name (string), and you can override any or all of them with any valid Google Material Design icon.
+Each icon is defined by a Material icon name (string), and you can override icons per node via properties on `VirtualTreeViewNode<T>`.
 
-The component provides simple, built-in icon controls and is easy to customize:
-
-- Component-level parameters (Material icon names):
-  - `CollapsedNodeIcon` – icon used for nodes that can have children but are currently collapsed  
+- Per-node properties (Material icon names):
+  - `VirtualTreeViewNode<T>.CollapsedIcon` – icon used for nodes that can have children but are currently collapsed  
     *(default: `"folder"`)*  
-  - `ExpandedNodeIcon` – icon used for nodes that have children and are expanded  
+  - `VirtualTreeViewNode<T>.ExpandedIcon` – icon used for nodes that have children and are expanded  
     *(default: `"folder_open"`)*  
-  - `LeafNodeIcon` – icon used for leaf nodes  
-    *(default: `"description"`)*
+  - `VirtualTreeViewNode<T>.LeafIcon` – icon used for leaf nodes  
+    *(default: `"unknown_document"`)*
 
-These parameters are used by the component's internal icon resolver to choose which icon string to render for each row.
+These properties are used by the component's internal icon resolver to choose which icon string to render for each row.
 <br/>
-*Note: These parameters are of course ignored if you provide a custom `NodeTemplate` render fragment.*
+*Note: These properties are of course ignored if you provide a custom `NodeTemplate` render fragment.*
 
-Override Default Icons Example:
-
-```razor
-<VirtualTreeView
-    CollapsedNodeIcon="group_off"
-    ExpandedNodeIcon="group"
-    LeafNodeIcon="person" 
-    .../>
-```
-
-**Render Fragment (Per-node Template)**
-
-The `VirtualTreeView` supports a `NodeTemplate` render fragment so you can fully customize how each node is rendered. The template receives a `VirtualTreeViewNode<T>` as `Context` and should stay lightweight because templates are created/destroyed frequently due to virtualization.
-
-Short example:
+**Override Icons Example (per node)**
 
 ```razor
-<VirtualTreeView ... >
+<VirtualTreeView>
     <NodeTemplate Context="node">
         <div style="display:flex;align-items:center;gap:8px;width:100%;">
             <span class="material-symbols-outlined" style="font-size:20px;flex:0 0 auto;">

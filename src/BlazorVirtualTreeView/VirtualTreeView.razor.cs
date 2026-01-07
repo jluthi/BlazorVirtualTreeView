@@ -78,15 +78,15 @@ namespace BlazorVirtualTreeView
         public bool ShowRootNode { get; set; } = false;
 
         /// <summary>
-        /// Display text for the synthetic root node.
+        /// Display text for the synthetic root node. Does nothing if <see cref="ShowRootNode"/> is false.
         /// Default: "Root".
         /// </summary>
         [Parameter]
         public string RootNodeText { get; set; } = "Root";
 
         /// <summary>
-        /// Optional icon for the synthetic root node.
-        /// If null, normal folder logic applies.
+        /// Optional icon for the synthetic root node. Does nothing if <see cref="ShowRootNode"/> is false.
+        /// Defaut: "folder_open".
         /// </summary>
         [Parameter]
         public string? RootNodeIcon { get; set; } = "folder_open";
@@ -96,32 +96,6 @@ namespace BlazorVirtualTreeView
         /// </summary>
         [Parameter]
         public bool ExpandNodeOnDoubleClick { get; set; } = false;
-
-
-        // =====================================================
-        // Icons
-        // =====================================================
-
-        /// <summary>
-        /// Icon used for nodes that can have children but are currently collapsed.
-        /// Default: "folder".
-        /// </summary>
-        [Parameter]
-        public string CollapsedNodeIcon { get; set; } = "folder";
-
-        /// <summary>
-        /// Icon used for nodes that can have children and are currently expanded.
-        /// Default: "folder_open".
-        /// </summary>
-        [Parameter]
-        public string ExpandedNodeIcon { get; set; } = "folder_open";
-
-        /// <summary>
-        /// Icon used for leaf nodes (nodes that cannot have children).
-        /// Default: "Description".
-        /// </summary>
-        [Parameter]
-        public string LeafNodeIcon { get; set; } = "unknown_document";
 
 
         // =====================================================
@@ -244,7 +218,6 @@ namespace BlazorVirtualTreeView
             _ => 16
         };
 
-       
         #region Component Lifecyle
 
         protected override void OnParametersSet()
@@ -269,7 +242,6 @@ namespace BlazorVirtualTreeView
             }
         }
 
-
         protected override async Task OnAfterRenderAsync(bool firstRender)
         {
             if (_pendingScrollToTop)
@@ -280,7 +252,6 @@ namespace BlazorVirtualTreeView
                     "lazyTreeScrollToTop",
                     _containerRef);
             }
-
 
             if (!_scrollRequested || _pendingScrollTarget == null)
                 return;
@@ -834,9 +805,9 @@ namespace BlazorVirtualTreeView
         private string ResolveNodeIcon(VirtualTreeViewNode<T> node)
         {
             if (node.IsLeafNode)
-                return LeafNodeIcon;
+                return node.LeafIcon;
 
-            return (node.ChildrenLoaded && node.IsExpanded) ? ExpandedNodeIcon : CollapsedNodeIcon;
+            return (node.ChildrenLoaded && node.IsExpanded) ? node.ExpandedIcon : node.CollapsedIcon;
         }
 
         /// <summary>
