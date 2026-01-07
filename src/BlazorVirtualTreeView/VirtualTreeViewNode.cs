@@ -1,6 +1,6 @@
 ﻿public class VirtualTreeViewNode<T>
 {
-    #region Identity (immutable)
+    #region Identity
 
     /// <summary>
     /// Stable DOM id used for virtualization and scroll targeting. Generated independently of <see cref="Key"/> so the user key is not exposed in the rendered markup.
@@ -12,12 +12,6 @@
     /// </summary>
     public string Key { get; init; } = string.Empty;
 
-    /// <summary>
-    /// Tree-managed hierarchical path (computed from Parent chain).
-    /// </summary>
-    public string Path => Parent == null
-        ? Key
-        : string.IsNullOrEmpty(Parent.Path) ? Key : $"{Parent.Path}/{Key}";
 
     #endregion
 
@@ -66,6 +60,13 @@
     /// Optional parent reference (runtime-only).
     /// </summary>
     public VirtualTreeViewNode<T>? Parent { get; set; }
+
+    /// <summary>
+    /// Tree-managed hierarchical path (computed from Parent chain).
+    /// </summary>
+    public string Path => Parent == null
+        ? Key
+        : string.IsNullOrEmpty(Parent.Path) ? Key : $"{Parent.Path}/{Key}";
 
     /// <summary>
     /// Depth level in the tree (root = 0).

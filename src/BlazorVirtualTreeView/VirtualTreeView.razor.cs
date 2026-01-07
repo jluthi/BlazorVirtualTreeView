@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.JSInterop;
 using System.Diagnostics;
+using System.Linq.Expressions;
 
 namespace BlazorVirtualTreeView
 {
@@ -11,18 +12,16 @@ namespace BlazorVirtualTreeView
     /// </summary>
     public partial class VirtualTreeView<T> : ComponentBase
     {
-        // Injected Services
+        #region Dependencies
+
         [Inject]
         private IJSRuntime JS { get; set; } = default!;
 
+        #endregion
+
+
         #region Parameters
 
-        /// <summary>
-        /// Optional Razor template used to render a node.
-        /// If not provided, the default built-in renderer is used.
-        /// </summary>
-        [Parameter]
-        public RenderFragment<VirtualTreeViewNode<T>>? NodeTemplate { get; set; }
 
         // =====================================================
         // Data & required inputs
@@ -50,10 +49,10 @@ namespace BlazorVirtualTreeView
         // =====================================================
 
         /// <summary>
-        /// Event invoked when the selected node changes.
+        /// Raised when <see cref="SelectedNode"/> changes. Used by <c>@bind-SelectedNode</c>.
         /// </summary>
         [Parameter]
-        public EventCallback<VirtualTreeViewNode<T>> SelectedNodeChanged { get; set; }
+        public EventCallback<VirtualTreeViewNode<T>?> SelectedNodeChanged { get; set; }
 
         /// <summary>
         /// Event invoked when the user opens a context menu on a node (right-click).
@@ -65,6 +64,20 @@ namespace BlazorVirtualTreeView
         // =====================================================
         // Tree structure & behavior
         // =====================================================
+
+        /// <summary>
+        /// Currently selected node in the tree, or null when nothing is selected.
+        /// Supports <c>@bind-SelectedNode</c>.
+        /// </summary>
+        [Parameter]
+        public VirtualTreeViewNode<T>? SelectedNode { get; set; }
+
+        /// <summary>
+        /// Used for forms/validation scenarios with <c>@bind-SelectedNode</c>.
+        /// </summary>
+        [Parameter]
+        public Expression<Func<VirtualTreeViewNode<T>?>>? SelectedNodeExpression { get; set; }
+
 
         /// <summary>
         /// When true, the tree renders a single synthetic root node that
@@ -131,8 +144,18 @@ namespace BlazorVirtualTreeView
         [Parameter]
         public bool DisableSmoothScrolling { get; set; } = false;
 
+
+        /// <summary>
+        /// Optional Razor template used to render a node.
+        /// If not provided, the default built-in renderer is used.
+        /// </summary>
+        [Parameter]
+        public RenderFragment<VirtualTreeViewNode<T>>? NodeTemplate { get; set; }
+
         #endregion
 
+
+        #region Private Members
         private ElementReference _containerRef;
 
         /// <summary>
@@ -147,12 +170,6 @@ namespace BlazorVirtualTreeView
         };
 
         private bool _pendingScrollToTop;
-
-        /// <summary>
-        /// Currently selected node in the tree, or null when nothing is selected.
-        /// Read-only; use <see cref="SelectedNodeChanged"/> event and component APIs to update.
-        /// </summary>
-        public VirtualTreeViewNode<T>? SelectedNode { get; internal set; }
 
         private VirtualTreeViewNode<T>? _pendingScrollTarget;
 
@@ -210,6 +227,9 @@ namespace BlazorVirtualTreeView
             _ => 16
         };
 
+        #endregion
+
+
         #region Component Lifecyle
 
         protected override void OnParametersSet()
@@ -232,6 +252,10 @@ namespace BlazorVirtualTreeView
                     _syntheticRoot.IsExpanded = true;
                 RebuildVisibleNodes();
             }
+
+            // If consumer changed SelectedNode via binding, reflect it in internal flags.
+            if (SelectedNode != null && !SelectedNode.IsSelected)
+                SelectedNode.IsSelected = true;
         }
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -773,7 +797,6 @@ namespace BlazorVirtualTreeView
 
             parent.Children.Add(node);
 
-            DebugAssertNodeAttached(node);
         }
 
         private static void ValidateNodeKey(string key)
@@ -1085,21 +1108,6 @@ namespace BlazorVirtualTreeView
         #endregion
 
 
-        #region Debug
 
-        [Conditional("DEBUG")]
-        private void DebugAssertNodeAttached(VirtualTreeViewNode<T> node)
-        {
-            //Debug.Assert(
-            //    node.Parent != null,
-            //    "VirtualTreeView invariant violated: node.Parent is null after attachment.");
-
-            //Debug.Assert(
-            //    IsDescendantOf(node, _syntheticRoot),
-            //    "VirtualTreeView invariant violated: node is not attached to the internal root. " +
-            //    "This will break selection and virtualization (the node may render but cannot be found for selection).");
-        }
-
-        #endregion
     }
 }

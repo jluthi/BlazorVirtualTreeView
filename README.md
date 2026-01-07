@@ -66,10 +66,11 @@ to either `Pages/App.razor` for Blazor Server **or** `wwwroot/index.html` for Bl
   - `Size` - Affects tree view content dentisty via node height, icon size, indentation, etc...
   - `DisableSmoothScrolling` - disable smooth scrolling behavior (go instantly to target position).
   - `AutoScrollAlignment` - control how selected nodes are aligned when programmatically scrolled into view.
+  - `SelectedNode` - current selection (supports `@bind-SelectedNode`).
+  - `SelectedNodeExpression` - supports `EditForm` / validation scenarios when using `@bind-SelectedNode`.
 - Common events to listen for:
   - `SelectedNodeChanged` - notified when selection changes.
   - `OnNodeContextMenu` - invoked for right-click/context menu actions.
-  - `VirtualTreeView<T>.SelectedNode` - read-only property exposing the currently selected node.
 
 
 See `examples/BlazorTreeView.Demo/Components/Pages/Home.razor` for a full usage example.
@@ -137,27 +138,30 @@ This virtual tree view component offers further customization by exposing a `Nod
 Example: 
 
 ```razor
-<VirtualTreeView ..>
-    <!-- Custom Node Template -->
+<VirtualTreeView ...>
+    <!-- Custom node template -->
     <NodeTemplate Context="node">
-        <div style="display:flex;align-items:center;gap:8px;">
+        <div class="tree-node">
             <!-- Icon -->
-            <div class="material-symbols-outlined" style="font-size:20px;">
-                @(node.IsLeafNode ? node.LeafIcon : (node.IsExpanded ? node.ExpandedIcon : node.CollapsedIcon))
-            </div>
+            <span class="material-symbols-outlined" style="font-size:20px;">
+                @(node.IsLeafNode
+                    ? node.LeafIcon
+                    : node.IsExpanded
+                        ? node.ExpandedIcon
+                        : node.CollapsedIcon)
+            </span>
 
             <!-- Text -->
-            <div>
-                @node.Text
-            </div>
+            <span>@node.Text</span>
 
-            <!--Custom Display Counter-->
+            <!-- Child count -->
             <span>
-                (@(node.Children == null ? "?" : node.Children.Count.ToString()))
+                (@(node.Children?.Count.ToString() ?? "?"))
             </span>
         </div>
-    </NodeTemplate>  
- </VirtualTreeView>
+    </NodeTemplate>
+</VirtualTreeView>
+
 ```
 
 <br/>

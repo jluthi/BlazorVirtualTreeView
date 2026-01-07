@@ -1,6 +1,6 @@
 ﻿/// <summary>
-/// Specifies the visual size of the tree, affecting row height,
-/// icon size, and indentation spacing.
+/// Specifies the visual size of the tree, affecting the following node visuals: height, indentation spacing
+/// icon size, and text font size.
 /// </summary>
 public enum VirtualTreeViewSize
 {

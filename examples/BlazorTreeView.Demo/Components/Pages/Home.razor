@@ -215,23 +215,25 @@
         
 @*Uncomment below to see custom node template example*@
 @*     <NodeTemplate Context="node">
-        <div style="display:flex;align-items:center;gap:8px;">
+        <div class="tree-node">
             <!-- Icon -->
-            <div class="material-symbols-outlined" style="font-size:20px;">
-                @(node.IsLeafNode ? node.LeafIcon : (node.IsExpanded ? node.ExpandedIcon : node.CollapsedIcon))
-            </div>
+            <span class="material-symbols-outlined" style="font-size:20px;">
+                @(node.IsLeafNode
+                                ? node.LeafIcon
+                                : node.IsExpanded
+                                ? node.ExpandedIcon
+                                : node.CollapsedIcon)
+            </span>
 
             <!-- Text -->
-            <div>
-                @node.Text
-            </div>
+            <span>@node.Text</span>
 
-            <!--Custom Display Counter-->
+            <!-- Child count -->
             <span>
-                (@(node.Children == null ? "?" : node.Children.Count.ToString()))
+                (@(node.Children?.Count.ToString() ?? "?"))
             </span>
         </div>
-    </NodeTemplate>  *@ 
+    </NodeTemplate> *@
    
 
 </VirtualTreeView>
