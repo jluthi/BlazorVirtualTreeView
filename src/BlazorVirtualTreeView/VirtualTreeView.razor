@@ -259,6 +259,7 @@
             *@
             <div id="@node.DomId"
                  class="virt-tree-row"
+                 style="max-height:@(RowHeight)px;"
                  @oncontextmenu="@((MouseEventArgs e) => OnContextMenuAsync(e, node))"
                  @oncontextmenu:preventDefault="true"
                  @oncontextmenu:stopPropagation="true">
@@ -274,12 +275,24 @@
                         @* Expand / collapse toggle*@
                         @if (!node.IsLeafNode)
                         {
-                            <div class="virt-tree-icon material-symbols-outlined @(node.IsLoading ? "virt-tree-spinner" : "")"
-                                 style="width:@($"{IconSizePx}px"); height:@($"{IconSizePx}px"); font-size:@($"{IconSizePx}px"); font-weight: 400;"
-                                 @onclick:stopPropagation="true"
-                                 @onclick="@(() => ToggleAsync(node))">
-                                @ResolveExpandIcon(node)
-                            </div>
+                            var expandIcon = ResolveExpandIcon(node);
+
+                            if (!string.IsNullOrEmpty(expandIcon))
+                            {
+                                <div class="virt-tree-icon material-symbols-outlined @(node.IsLoading ? "virt-tree-spinner" : "")"
+                                     style="font-size:@($"{IconSizePx}px"); font-weight: 400;"
+                                     @onclick:stopPropagation="true"
+                                     @onclick="@(() => ToggleAsync(node))">
+                                    @expandIcon
+                                </div>
+                            }
+                            else
+                            {
+                                @* Placeholder keeps text alignment consistent when there is no expand glyph *@
+                                <div class="virt-tree-icon-placeholder"
+                                     style="width:@($"{IconSizePx}px"); height:@($"{IconSizePx}px");">
+                                </div>
+                            }
                         }
                         else
                         {
@@ -312,7 +325,7 @@
 
                                 @* Display text for the node (no flex) *@
                                 <div class="virt-tree-text"
-                                        style="font-size:@($"{IconSizePx}px"); font-weight: 400;">
+                                        style="font-size:@($"{FontSizePx}px"); font-weight: 400;">
                                     @node.Text
                                 </div>
 

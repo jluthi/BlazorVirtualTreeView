@@ -206,35 +206,45 @@ namespace BlazorVirtualTreeView
         // Layout helpers
         private int RowHeight => Size switch
         {
-            VirtualTreeViewSize.ExtraSmall => 20,
-            VirtualTreeViewSize.Small => 24,
-            VirtualTreeViewSize.Medium => 28,
-            VirtualTreeViewSize.Large => 32,
-            VirtualTreeViewSize.ExtraLarge => 36,
+            VirtualTreeViewSize.ExtraSmall => 28,
+            VirtualTreeViewSize.Small => 30,
+            VirtualTreeViewSize.Medium => 32,
+            VirtualTreeViewSize.Large => 35,
+            VirtualTreeViewSize.ExtraLarge => 38,
             _ => 28
-        };
-
-        private int IconSizePx => Size switch
-        {
-            VirtualTreeViewSize.ExtraSmall => 14,
-            VirtualTreeViewSize.Small => 16,
-            VirtualTreeViewSize.Medium => 20,
-            VirtualTreeViewSize.Large => 24,
-            VirtualTreeViewSize.ExtraLarge => 28,
-            _ => 20
         };
 
         private int IndentSizePx => Size switch
         {
-            VirtualTreeViewSize.ExtraSmall => 14,
-            VirtualTreeViewSize.Small => 16,
-            VirtualTreeViewSize.Medium => 20,
-            VirtualTreeViewSize.Large => 24,
-            VirtualTreeViewSize.ExtraLarge => 28,
-            _ => 20
+            VirtualTreeViewSize.ExtraSmall => 12,
+            VirtualTreeViewSize.Small => 14,
+            VirtualTreeViewSize.Medium => 16,
+            VirtualTreeViewSize.Large => 18,
+            VirtualTreeViewSize.ExtraLarge => 20,
+            _ => 16
         };
 
+        private int IconSizePx => Size switch
+        {
+            VirtualTreeViewSize.ExtraSmall => 20,
+            VirtualTreeViewSize.Small => 22,
+            VirtualTreeViewSize.Medium => 24,
+            VirtualTreeViewSize.Large => 26,
+            VirtualTreeViewSize.ExtraLarge => 28,
+            _ => 16
+        };
 
+        private int FontSizePx => Size switch
+        {
+            VirtualTreeViewSize.ExtraSmall => 12,
+            VirtualTreeViewSize.Small => 14,
+            VirtualTreeViewSize.Medium => 16,
+            VirtualTreeViewSize.Large => 18,
+            VirtualTreeViewSize.ExtraLarge => 20,
+            _ => 16
+        };
+
+       
         #region Component Lifecyle
 
         protected override void OnParametersSet()
