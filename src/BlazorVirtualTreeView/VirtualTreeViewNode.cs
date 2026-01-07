@@ -3,15 +3,21 @@
     #region Identity (immutable)
 
     /// <summary>
-    /// Stable DOM id used for virtualization + scroll targeting.
+    /// Stable DOM id used for virtualization and scroll targeting. Generated independently of <see cref="Key"/> so the user key is not exposed in the rendered markup.
     /// </summary>
-    public string DomId { get; } = $"tree-node-{Guid.NewGuid():N}";
+    internal string DomId { get; } = $"tree-node-{Guid.NewGuid():N}";
 
     /// <summary>
-    /// Tree-managed hierarchical path
-    /// (e.g. "cases/2025/12345/documents").
+    /// User-defined identifier for this node. Must be unique among siblings (nodes at the same level under the same parent).
     /// </summary>
-    public string Path { get; init; } = string.Empty;
+    public string Key { get; init; } = string.Empty;
+
+    /// <summary>
+    /// Tree-managed hierarchical path (computed from Parent chain).
+    /// </summary>
+    public string Path => Parent == null
+        ? Key
+        : string.IsNullOrEmpty(Parent.Path) ? Key : $"{Parent.Path}/{Key}";
 
     #endregion
 
@@ -59,7 +65,7 @@
     /// <summary>
     /// Optional parent reference (runtime-only).
     /// </summary>
-    public VirtualTreeViewNode<T>? Parent { get; internal set; }
+    public VirtualTreeViewNode<T>? Parent { get; set; }
 
     /// <summary>
     /// Depth level in the tree (root = 0).

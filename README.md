@@ -74,23 +74,37 @@ to either `Pages/App.razor` for Blazor Server **or** `wwwroot/index.html` for Bl
 
 See `examples/BlazorTreeView.Demo/Components/Pages/Home.razor` for a full usage example.
 
+### 🔑 Node Identity (`Key` / `Path`)
+
+Each `VirtualTreeViewNode<T>` must have a *valid* `Key`. The tree uses `Key` segments to compute `Path` and navigate programmatically.
+
+**`Key` rules (enforced by the component at attach-time):**
+- Must be non-empty (not null/whitespace)
+- Must not contain leading or trailing whitespace
+- Must not contain `/` (reserved as the path separator)
+- Must be unique among siblings, **case-insensitive** (OrdinalIgnoreCase)
+
+The component builds `Path` from the `Parent` chain using `Key` segments (e.g. `parent/child/grandchild`).  
+Programmatic navigation (`SelectNodeAsync`) relies on these `Path` segments to find and expand nodes.
+
 
 ### 🏃🏽‍♂️ Node Flexibility
 
-Although the demo shows a folder / subfolder style tree, the component is data-agnostic and supports any hierarchical model that can be expressed with a stable `Path` per node and a `CanHaveChildren` flag. Examples beyond filesystem-style folders:
+Although the demo shows a folder / subfolder style tree, the component is data-agnostic and can represent any hierarchical model.
+
+Examples beyond filesystem-style folders:
 
 - Case management: `cases/2025/12345/documents`
 - Organizational charts: `company/division/team/member`
 - Product categories and SKUs: `electronics/phones/brand/model`
 - Time-based buckets: `2025/Q1/Week12/Events`
 
-How to adapt your data model:
 
-- Each `VirtualTreeViewNode<T>` carries a `Path` string and user `Value` (your domain object). The component uses the path segments to navigate and expand programmatically (see `SelectNodeAsync`).
-- `LoadChildren` can create nodes however you like - map your domain objects into `VirtualTreeViewNode<T>` with any naming or path scheme.
-- The tree does not require strictly two-level folder / file semantics: nodes can represent categories, items, groups, or any concept where `CanHaveChildren` indicates the presence of loadable children.
 
-This flexibility means you can present hierarchical data that is not a literal filesystem but still benefits from virtualization and lazy-loading.
+How To:
+
+Each `VirtualTreeViewNode<T>` must provide a stable `Key` that is unique among siblings. The component computes each node’s `Path` from the parent chain and `Key` segments, and that `Path` is what you use for navigation (for example, `SelectNodeAsync(path)`). Node look and feel is controlled by `IsLeafNode`.
+
 
 **Additional Information about expandability and icons (`IsLeafNode`)**
 
@@ -116,7 +130,11 @@ Each icon is defined by a Material icon name (string), and you can override icon
 These properties are used by the component's internal icon resolver to choose which icon string to render for each row.
 <br/>
 
-**Optional Node Template (Render Fragment Example)**
+**NodeTemplate (Render Fragment)**
+
+This virtual tree view component offers further customization by exposing a `NodeTemplate` render fragrment should you want full freedom to customize look and feel. 
+
+Example: 
 
 ```razor
 <VirtualTreeView ..>

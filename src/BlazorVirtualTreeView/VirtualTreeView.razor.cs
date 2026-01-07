@@ -142,7 +142,6 @@ namespace BlazorVirtualTreeView
         private readonly VirtualTreeViewNode<T> _syntheticRoot = new()
         {
             Text = "Root",
-            Path = string.Empty,
             IsLeafNode = false,
             Level = -1
         };
@@ -750,16 +749,43 @@ namespace BlazorVirtualTreeView
 
         private void AttachNodeInternal(VirtualTreeViewNode<T> node, VirtualTreeViewNode<T> parent)
         {
+            if (node is null)
+                throw new ArgumentNullException(nameof(node));
+
+            if (parent is null)
+                throw new ArgumentNullException(nameof(parent));
+
+            ValidateNodeKey(node.Key);
+
+            parent.Children ??= new List<VirtualTreeViewNode<T>>();
+
+            if (parent.Children.Any(c => SegmentEquals(c.Key, node.Key)))
+            {
+                throw new InvalidOperationException(
+                    $"Duplicate node Key '{node.Key}' under parent '{parent.Path}'. Keys must be unique among siblings (case-insensitive).");
+            }
+
             // Always set Parent so selection, traversal, and assertions are correct.
             node.Parent = parent;
 
             // Levels: internal root is -1; its children become 0.
             node.Level = parent.Level + 1;
 
-            parent.Children ??= new List<VirtualTreeViewNode<T>>();
             parent.Children.Add(node);
 
             DebugAssertNodeAttached(node);
+        }
+
+        private static void ValidateNodeKey(string key)
+        {
+            if (string.IsNullOrWhiteSpace(key))
+                throw new InvalidOperationException("VirtualTreeViewNode Key must be non-empty.");
+
+            if (!string.Equals(key, key.Trim(), StringComparison.Ordinal))
+                throw new InvalidOperationException($"VirtualTreeViewNode Key '{key}' must not contain leading or trailing whitespace.");
+
+            if (key.Contains('/'))
+                throw new InvalidOperationException($"VirtualTreeViewNode Key '{key}' must not contain '/'. '/' is reserved as the path separator.");
         }
 
         private void RebuildVisibleNodes()

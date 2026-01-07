@@ -194,8 +194,8 @@
     @* Optional: Provide a custom per-node template to tailor the node look and feel to your needs. Uncomment the code below for an example. 
        - Context: `node` is a `VirtualTreeViewNode<T>` (here `T = string` is defined above, but normally you would use whatever custom object model you wish to bind to).
        - Available public properties on `VirtualTreeViewNode<T>`:
-           - `string DomId { get; }`                — stable DOM id for virtualization/scroll targeting
-           - `string Path { get; init; }`           — hierarchical path (e.g. "a/b/c")
+           - `string Key { get; init; }`            — unique key among siblings (used for identity)
+           - `string Path { get; }`           — hierarchical path (e.g. "a/b/c")
            - `T Value { get; init; }`               — user-defined domain object bound to the node
            - `string Text { get; set; }`            — display text shown in the tree
            - `VirtualTreeViewNode<T>? Parent { get; internal set; }` — parent reference
@@ -292,7 +292,7 @@
     /// </summary>
     protected override void OnInitialized()
     {
-        Roots = GenerateNodes(parentPath: "", depth: 0, count: RootCount);
+        Roots = GenerateNodes(parent: null, depth: 0, count: RootCount);
     }
 
     /// <summary>
@@ -354,10 +354,9 @@
         if (parent.Level >= MaxDepth)
             return Array.Empty<VirtualTreeViewNode<string>>();
 
-        // Generate the next level of children. The depth is incremented so that
-        // node names and paths accurately reflect their position in the hierarchy.
+        // Generate the next level of children.
         return GenerateNodes(
-            parent.Path,
+            parent,
             parent.Level + 1,
             ChildrenPerNode);
 
@@ -370,7 +369,7 @@
     /// Also updates the demo-wide TotalLoadedNodeCount whenever nodes are created.
     /// </summary>
     private IReadOnlyList<VirtualTreeViewNode<string>> GenerateNodes(
-        string parentPath,
+        VirtualTreeViewNode<string>? parent,
         int depth,
         int count)
     {
@@ -382,12 +381,11 @@
         int index = 0;
 
         for (int i = 0; i < folderCount; i++, index++)
-            list.Add(CreateNode(parentPath, depth, index, canHaveChildren: true));
+            list.Add(CreateNode(parent, depth, index, canHaveChildren: true));
 
         for (int i = 0; i < leafCount; i++, index++)
-            list.Add(CreateNode(parentPath, depth, index, canHaveChildren: false));
+            list.Add(CreateNode(parent, depth, index, canHaveChildren: false));
 
-        // Update the running total of nodes created for demo telemetry.
         System.Threading.Interlocked.Add(ref TotalLoadedNodeCount, list.Count);
 
         return list;
@@ -397,8 +395,8 @@
     /// Creates an individual VirtualTreeViewNode with path and metadata.
     /// </summary>
     private VirtualTreeViewNode<string> CreateNode(
-        string parentPath,
-        int depth,
+       VirtualTreeViewNode<string>? parent,
+         int depth,
         int index,
         bool canHaveChildren)
     {
@@ -408,9 +406,10 @@
 
         var node = new VirtualTreeViewNode<string>
         {
+            Parent = parent,
+            Key = name, // Must be unique among this node's siblings. Use a stable key (e.g., derived from the node's path); use a GUID only if you don't need deterministic navigation across reloads.
             Value = name,
             Text = name,
-            Path = string.IsNullOrEmpty(parentPath) ? name : $"{parentPath}/{name}",
             IsLeafNode = !canHaveChildren
         };
 
@@ -426,7 +425,7 @@
             // Use default icon
             // Note: You can have the leaf icon be a different icon based on file type, etc., if desired.
             node.LeafIcon = node.LeafIcon;
-      
+
         }
 
         return node;
@@ -588,9 +587,10 @@
 
         var node = new VirtualTreeViewNode<string>
         {
+            Parent = parent,
+            Key = name, // Must be unique among this node's siblings. Use a stable key (e.g., derived from the node's path); use a GUID only if you don't need deterministic navigation across reloads.
             Value = name,
             Text = name,
-            Path = $"{parent.Path}/{name}",
             IsLeafNode = !canHaveChildren
         };
 
@@ -612,7 +612,7 @@
         _treeView.AddNode(node, _treeView.SelectedNode);
 
         // Keep demo counter in sync with manual additions.
-        System.Threading.Interlocked.Increment(ref TotalLoadedNodeCount);
+        TotalLoadedNodeCount++;
 
         ContextMenuService.Close();
     }
