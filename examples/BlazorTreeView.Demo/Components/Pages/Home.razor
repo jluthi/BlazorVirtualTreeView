@@ -133,11 +133,11 @@
         <span class="text-muted" style="margin-left:12px;">Auto Scroll Alignment</span>
 
         <InputSelect @bind-Value="_scrollAlignment"
+                     @bind-Value:after="PersistScrollAlignmentAsync"
                      class="form-select"
                      style="width:160px;margin-left:6px;"
                      title="Determines where the target node will be placed in the viewport when scrolled into view."
-                     aria-label="Scroll Alignment"
-                     @onchange="OnScrollAlignmentChanged">
+                     aria-label="Scroll Alignment">
             @foreach (var s in Enum.GetValues(typeof(ScrollAlignments)).Cast<ScrollAlignments>())
             {
                 <option value="@s">@s</option>
@@ -178,7 +178,7 @@
 @* Note: This demo uses string as T (type). Replace T with your domain model and
    update the LoadChildrenAsync signature accordingly (or whatever your equivalent method will be called). *@
 <VirtualTreeView @ref="_treeView"
-                 Height="800px"
+                 Height="650px"
                  Width="30%"
                  T="string"
                  Roots="@Roots"
@@ -285,6 +285,9 @@
     private int TotalLoadedNodeCount = 0;
 
     #endregion
+
+    private Task PersistScrollAlignmentAsync()
+        => SaveSettingAsync("bvtv_scrollAlignment", _scrollAlignment.ToString());
 
 
     #region Page Lifecycle
