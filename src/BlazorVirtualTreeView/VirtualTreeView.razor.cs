@@ -122,13 +122,13 @@ namespace BlazorVirtualTreeView
         /// Used to calculate the virtualization viewport.
         /// </summary>
         [Parameter]
-        public string Height { get; set; } = "500px";
+        public string Height { get; set; } = "100%";
 
         /// <summary>
         /// CSS width for the tree container (for example "500px" or "100%").
         /// </summary>
         [Parameter]
-        public string Width { get; set; } = "500px";
+        public string Width { get; set; } = "100%";
 
         /// <summary>
         /// Controls how the tree attempts to align a scrolled-to node in the viewport.

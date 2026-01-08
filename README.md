@@ -141,14 +141,14 @@ Example:
 <VirtualTreeView ...>
     <!-- Custom node template -->
     <NodeTemplate Context="node">
-        <div class="tree-node">
+        <div style="display:flex;align-items:center;gap:8px;">
             <!-- Icon -->
             <span class="material-symbols-outlined" style="font-size:20px;">
                 @(node.IsLeafNode
-                    ? node.LeafIcon
-                    : node.IsExpanded
-                        ? node.ExpandedIcon
-                        : node.CollapsedIcon)
+                                ? node.LeafIcon
+                                : node.IsExpanded
+                                ? node.ExpandedIcon
+                                : node.CollapsedIcon)
             </span>
 
             <!-- Text -->
