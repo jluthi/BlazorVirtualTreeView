@@ -6,7 +6,7 @@ Project: `BlazorVirtualTreeView.csproj`
 
 Target Framework: .NET 10+
 
-_NuGet package coming soon*_
+[NuGet Package Available!](https://www.nuget.org/packages/BlazorVirtualTreeView)
 
 ## 💫 Key Features
 
@@ -23,7 +23,7 @@ See the demo app in `examples/BlazorTreeView.Demo` for a working example.
 
 ## 🖼️ Demo
 
-![Lazy loading demo](demo.gif)
+![Virtual Tree View Demo gif](demo.gif)
 
 Description: The GIF shows expanding to a deep node, node navigation via URL query string, real-time lazy loading, and virtual scrolling with smooth scrolling enabled.  
 

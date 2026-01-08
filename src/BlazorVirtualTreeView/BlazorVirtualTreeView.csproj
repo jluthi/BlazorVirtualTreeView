@@ -5,8 +5,24 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <EnableDefaultItems>true</EnableDefaultItems>
-    <EnableRazorCompileOnBuild>true</EnableRazorCompileOnBuild>
+    <Title>Blazor Virtual Tree View</Title>
+    <Description>A Virtual Tree View built for .NET Blazor</Description>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <RepositoryUrl>https://github.com/jluthi/BlazorVirtualTreeView</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <Authors>jluthi</Authors>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageTags>blazor virtualtreeview</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="10.0.1" />
