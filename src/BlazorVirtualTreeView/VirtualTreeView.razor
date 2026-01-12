@@ -267,7 +267,7 @@
 
                 @* Keep the indentation applied to the icon + content so alignment is preserved. *@
                 <div style="display: flex; width: 100%;">
-                    
+
                     @* Spacer for indentation *@
                     <div style="flex-shrink: 0; width: @(Math.Max(0, (ShowRootNode ? node.Level + 1 : node.Level)) * IndentSizePx)px;"></div>
 
@@ -280,7 +280,7 @@
 
                             if (!string.IsNullOrEmpty(expandIcon))
                             {
-                                <div class="virt-tree-icon material-symbols-outlined @(node.IsLoading ? "virt-tree-spinner" : "")"
+                                <div class="virt-tree-expand-icon material-symbols-outlined @(node.IsLoading ? "virt-tree-spinner-icon" : "")"
                                      style="font-size:@($"{IconSizePx}px"); font-weight: 400;"
                                      @onclick:stopPropagation="true"
                                      @onclick="@(() => ToggleAsync(node))">
@@ -290,7 +290,7 @@
                             else
                             {
                                 @* Placeholder keeps text alignment consistent when there is no expand glyph *@
-                                <div class="virt-tree-icon-placeholder"
+                                <div class="virt-tree-expand-placeholder"
                                      style="width:@($"{IconSizePx}px"); height:@($"{IconSizePx}px");">
                                 </div>
                             }
@@ -298,7 +298,7 @@
                         else
                         {
                             @* Placeholder keeps text alignment consistent for leaf nodes *@
-                            <div class="virt-tree-icon-placeholder"
+                            <div class="virt-tree-expand-placeholder"
                                  style="width:@($"{IconSizePx}px"); height:@($"{IconSizePx}px");">
                             </div>
                         }
@@ -306,7 +306,7 @@
                         @* 
                             Node content.
                         *@
-                        <div class="virt-tree-content @(node == SelectedNode ? "selected" : "")" 
+                        <div class="virt-tree-content @(node == SelectedNode ? "selected" : "")"
                              @onclick="@(() => OnRowClicked(node))"
                              @ondblclick="@(() => OnRowDoubleClicked(node))">
 
@@ -317,22 +317,21 @@
                             else
                             {
                                 <!-- DEFAULT RENDERING -->
-
                                 @* Main node icon (consumer-defined) *@
-                                <div class="virt-tree-node-icon material-symbols-outlined"
-                                        style="font-size:@($"{IconSizePx}px"); font-weight: 400; margin-right: 8px;">
+                                <div class="virt-tree-icon material-symbols-outlined"
+                                     style="font-size:@($"{IconSizePx}px"); font-weight: 400; margin-right: 8px;">
                                     @ResolveNodeIcon(node)
                                 </div>
 
                                 @* Display text for the node (no flex) *@
                                 <div class="virt-tree-text"
-                                        style="font-size:@($"{FontSizePx}px"); font-weight: 400;">
+                                     style="font-size:@($"{FontSizePx}px"); font-weight: 400;">
                                     @node.Text
                                 </div>
 
                             }
 
-                    
+
 
                         </div>
                     </div>

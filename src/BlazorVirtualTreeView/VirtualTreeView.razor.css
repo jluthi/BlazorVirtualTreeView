@@ -2,9 +2,9 @@
 .virt-tree-container,
 .virt-tree-row,
 .virt-tree-content,
-.virt-tree-icon,
+.virt-tree-expand-icon,
 .virt-tree-icon-placeholder,
-.virt-tree-node-icon {
+.virt-tree-icon {
     -webkit-user-select: none !important;
     -moz-user-select: none !important;
     -ms-user-select: none !important;
@@ -19,10 +19,10 @@
     padding: 4px;
 }
 
-.virt-tree-container:focus {
-    outline: none;
-    box-shadow: none;
-}
+    .virt-tree-container:focus {
+        outline: none;
+        box-shadow: none;
+    }
 
 /* Row */
 .virt-tree-row {
@@ -37,61 +37,9 @@
     min-width: 0; /* allow text truncation */
 }
 
-/* Content (full-width highlight area) */
-.virt-tree-content {
-    display: flex;
-    align-items: center;
-    width: 100%;
-    box-sizing: border-box;
-    padding: 4px 8px;
-}
-
-.virt-tree-content:hover {
-    background-color: rgba(0, 0, 0, 0.04);
-    border-radius: 6px;
-}
-
-.virt-tree-content.selected {
-    background-color: rgba(25, 118, 210, 0.20);
-    border-radius: 6px;
-}
-
-/* Icons / placeholders */
-.virt-tree-icon,
-.virt-tree-icon-placeholder,
-.virt-tree-node-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-
-/* Spacing between expand icon/placeholder and content */
-.virt-tree-icon + .virt-tree-content,
-.virt-tree-icon-placeholder + .virt-tree-content {
-    margin-left: 6px;
-}
-
-.virt-tree-icon:hover {
-    background-color: rgba(0, 0, 0, 0.04);
-    border-radius: 50%;
-}
-
-/* Text */
-.virt-tree-text {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    min-width: 0;
+.virt-tree-expand-icon {
     cursor: pointer;
-    font-family: 'Roboto';
-    /* Allow selection only for text */
-    -webkit-user-select: text !important;
-    -moz-user-select: text !important;
-    -ms-user-select: text !important;
-    user-select: text !important;
 }
-
 
 /* Spinner */
 @keyframes spin {
@@ -104,6 +52,75 @@
     }
 }
 
-.virt-tree-spinner {
+.virt-tree-spinner-icon {
     animation: spin 1s linear infinite;
+}
+
+
+/* Icons / placeholders */
+.virt-tree-expand-icon,
+.virt-tree-expand-placeholder {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+    .virt-tree-expand-icon:hover {
+        background-color: rgba(0, 0, 0, 0.04);
+        border-radius: 50%;
+    }
+
+/* Content (full-width highlight area) */
+.virt-tree-content {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 4px 8px;
+}
+
+    .virt-tree-content:hover {
+        background-color: rgba(0, 0, 0, 0.04);
+        border-radius: 6px;
+    }
+
+    .virt-tree-content.selected {
+        background-color: rgba(25, 118, 210, 0.20);
+        border-radius: 6px;
+    }
+
+.virt-tree-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+    .virt-tree-icon:hover {
+        background-color: rgba(0, 0, 0, 0.04);
+        border-radius: 50%;
+    }
+
+/* Spacing between expand icon/placeholder and content */
+.virt-tree-expand-icon + .virt-tree-content,
+.virt-tree-expand-placeholder + .virt-tree-content
+.virt-tree-icon + .virt-tree-content,
+{
+    margin-left: 6px;
+}
+
+/* Text */
+.virt-tree-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+    font-family: 'Roboto';
+    /* Allow selection only for text */
+    -webkit-user-select: text !important;
+    -moz-user-select: text !important;
+    -ms-user-select: text !important;
+    user-select: text !important;
 }
