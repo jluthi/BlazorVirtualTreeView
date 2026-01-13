@@ -716,6 +716,8 @@ namespace BlazorVirtualTreeView
                     if (!node.ChildrenLoaded)
                     {
                         node.IsLoading = true;
+                        await InvokeAsync(StateHasChanged);
+                        await Task.Yield();
 
                         try
                         {
