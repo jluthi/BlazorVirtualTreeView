@@ -8,7 +8,7 @@ Target Framework: *.NET 10+*
 
 [NuGet Package Available!](https://www.nuget.org/packages/BlazorVirtualTreeView)
 
-If viewing from NuGet, GitHub Respository can be found [Here](https://github.com/jluthi/BlazorVirtualTreeView)
+If viewing from NuGet, GitHub Respository can be found [here](https://github.com/jluthi/BlazorVirtualTreeView).
 
 > NuGet has a basic README rendering engine - hence the alarming red text in places. For the full README experience, please visit the GitHub repository linked above.
 
