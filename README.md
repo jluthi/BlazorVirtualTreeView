@@ -6,7 +6,7 @@ Project: *BlazorVirtualTreeView.csproj*
 
 Target Framework: *.NET 10+*
 
-[Project Package Available On NuGet!](https://www.nuget.org/packages/BlazorVirtualTreeView)
+[NuGet Package Available!](https://www.nuget.org/packages/BlazorVirtualTreeView)
 
 If viewing from NuGet, GitHub Respository can be found [Here](https://github.com/jluthi/BlazorVirtualTreeView)
 
