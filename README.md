@@ -2,11 +2,15 @@
 
 A high-performance, virtualized tree view component for Blazor with lazy-loading support. This repository contains the reusable `VirtualTreeView` component and a demo app showing how to use it at scale. As the Blazor ecosystem continues to mature, this project helps address a gap in available open-source components.
 
-Project: `BlazorVirtualTreeView.csproj`
+Project: *BlazorVirtualTreeView.csproj*
 
-Target Framework: .NET 10+
+Target Framework: *.NET 10+*
 
-[NuGet Package Available!](https://www.nuget.org/packages/BlazorVirtualTreeView)
+[Project Package Available On NuGet!](https://www.nuget.org/packages/BlazorVirtualTreeView)
+
+If viewing from NuGet, GitHub Respository can be found [Here](https://github.com/jluthi/BlazorVirtualTreeView)
+
+> NuGet has a basic README rendering engine - hence the alarming red text in places. For the full README experience, please visit the GitHub repository linked above.
 
 ## 💫 Key Features
 
@@ -23,7 +27,7 @@ See the demo app in `examples/BlazorTreeView.Demo` for a working example.
 
 ## 🖼️ Demo
 
-![Virtual Tree View Demo gif](demo.gif)
+![Virtual Tree View Demo gif](https://github.com/jluthi/BlazorVirtualTreeView/blob/master/demo.gif?raw=true)
 
 Description: The GIF shows expanding to a deep node, node navigation via URL query string, real-time lazy loading, and virtual scrolling with smooth scrolling enabled.  
 
@@ -71,6 +75,26 @@ to either `Pages/App.razor` for Blazor Server **or** `wwwroot/index.html` for Bl
 - Common events to listen for:
   - `SelectedNodeChanged` - notified when selection changes.
   - `OnNodeContextMenu` - invoked for right-click/context menu actions.
+
+
+Example: 
+
+```razor
+<VirtualTreeView @ref="_treeView"
+                 Height="650px"
+                 Width="30%"
+                 T="string"
+                 Roots="@Roots"
+                 LoadChildren="LoadChildrenAsync"
+                 ShowRootNode="@_showRootNode"
+                 Size="VirtualTreeViewSize.Medium"
+                 DisableSmoothScrolling="@_disableSmoothScroll"
+                 AutoScrollAlignment="@_scrollAlignment"
+                 ExpandNodeOnDoubleClick="@_expandOnDoubleClick"
+                 SelectedNodeChanged="OnSelectedNodeChanged"
+                 OnNodeContextMenu="OnNodeContextMenu"/>
+
+```
 
 
 See `examples/BlazorTreeView.Demo/Components/Pages/Home.razor` for a full usage example.
