@@ -27,7 +27,7 @@ See the demo app in `examples/BlazorTreeView.Demo` for a working example.
 
 ## 🖼️ Demo
 
-![Virtual Tree View Demo gif](https://github.com/jluthi/BlazorVirtualTreeView/blob/master/demo.gif?raw=true)
+![Virtual Tree View Demo gif](https://raw.githubusercontent.com/jluthi/BlazorVirtualTreeView/master/demo.gif)
 
 Description: The GIF shows expanding to a deep node, node navigation via URL query string, real-time lazy loading, and virtual scrolling with smooth scrolling enabled.  
 
