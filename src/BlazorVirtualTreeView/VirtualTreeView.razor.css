@@ -1,4 +1,5 @@
-﻿/* Disable selection everywhere by default */
+﻿
+/* Disable selection everywhere by default */
 .virt-tree-container,
 .virt-tree-row,
 .virt-tree-content,
@@ -12,36 +13,42 @@
     -webkit-touch-callout: none !important;
 }
 
-/* Container */
+
+/* Container (root) */
 .virt-tree-container {
     font-family: inherit;
     font-size: inherit;
     padding: 4px;
 }
 
-    .virt-tree-container:focus {
-        outline: none;
-        box-shadow: none;
-    }
+/* Container (focus state) */
+.virt-tree-container:focus {
+    outline: none;
+    box-shadow: none;
+}
 
-/* Row */
+
+/* Row (one rendered node row) */
 .virt-tree-row {
     width: 100%;
     cursor: default;
 }
 
-/* Main (expand icon + content wrapper) */
+
+/* Main row layout (expand icon + content wrapper) */
 .virt-tree-main {
     display: flex;
     vertical-align: middle;
-    min-width: 0; /* allow text truncation */
+    min-width: 0; /* Allow text truncation */
 }
 
+/* Expand icon (clickable) */
 .virt-tree-expand-icon {
     cursor: pointer;
 }
 
-/* Spinner */
+
+/* Spinner animation (used while loading children) */
 @keyframes spin {
     from {
         transform: rotate(0deg);
@@ -52,12 +59,13 @@
     }
 }
 
+/* Spinner icon (applies spin animation) */
 .virt-tree-spinner-icon {
     animation: spin 1s linear infinite;
 }
 
 
-/* Icons / placeholders */
+/* Expand icon and placeholder share the same layout box */
 .virt-tree-expand-icon,
 .virt-tree-expand-placeholder {
     display: inline-flex;
@@ -66,12 +74,14 @@
     flex-shrink: 0;
 }
 
-    .virt-tree-expand-icon:hover {
-        background-color: rgba(0, 0, 0, 0.04);
-        border-radius: 50%;
-    }
+/* Expand icon hover affordance */
+.virt-tree-expand-icon:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+    border-radius: 50%;
+}
 
-/* Content (full-width highlight area) */
+
+/* Content (full-width highlight area / interaction target) */
 .virt-tree-content {
     cursor: pointer;
     display: flex;
@@ -81,16 +91,20 @@
     padding: 4px 8px;
 }
 
-    .virt-tree-content:hover {
-        background-color: rgba(0, 0, 0, 0.04);
-        border-radius: 6px;
-    }
+/* Content hover state */
+.virt-tree-content:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+    border-radius: 6px;
+}
 
-    .virt-tree-content.selected {
-        background-color: rgba(25, 118, 210, 0.20);
-        border-radius: 6px;
-    }
+/* Content selected state */
+.virt-tree-content.selected {
+    background-color: rgba(25, 118, 210, 0.20);
+    border-radius: 6px;
+}
 
+
+/* Leading icon container (node icon) */
 .virt-tree-icon {
     display: inline-flex;
     align-items: center;
@@ -98,27 +112,23 @@
     flex-shrink: 0;
 }
 
-    .virt-tree-icon:hover {
-        background-color: rgba(0, 0, 0, 0.04);
-        border-radius: 50%;
-    }
 
-/* Spacing between expand icon/placeholder and content */
+/* Spacing between leading controls and content */
 .virt-tree-expand-icon + .virt-tree-content,
-.virt-tree-expand-placeholder + .virt-tree-content
-.virt-tree-icon + .virt-tree-content,
-{
+.virt-tree-expand-placeholder + .virt-tree-content,
+.virt-tree-icon + .virt-tree-content {
     margin-left: 6px;
 }
 
-/* Text */
+
+/* Text (allow text highlight only for the label text) */
 .virt-tree-text {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     min-width: 0;
     font-family: 'Roboto';
-    /* Allow selection only for text */
+
     -webkit-user-select: text !important;
     -moz-user-select: text !important;
     -ms-user-select: text !important;
